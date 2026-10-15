@@ -4,7 +4,7 @@
 // Optional: paste your free Web3Forms access key between the quotes (get it at https://web3forms.com).
 // Your client then gets a "Leave feedback" button, and each comment arrives in your email inbox.
 // Empty = the button is hidden.
-const FEEDBACK_KEY = "";
+const FEEDBACK_KEY = "d78468a5-b93c-4f3e-ae7f-9b7b69ff4419";
 
 const LABELS = { email: "Email", blog: "Blog" };
 const VERDICTS = { love: "♥ Loved it", changes: "✎ Changes requested" };
