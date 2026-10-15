@@ -4,13 +4,15 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex, nofollow" />
-  <title>Emails &amp; Blog · Review</title>
+  <title>MegaBliss · Content Preview</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <div class="glow" aria-hidden="true"><span></span><span></span></div>
+
   <!-- HOME: list of emails and blog posts -->
   <div id="home">
     <header class="header">
@@ -20,8 +22,9 @@
         <circle cx="30" cy="28" r="7" fill="var(--accent)" />
         <path d="m27 28 2 2 4-4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
       </svg>
-      <h1>Emails &amp; Blog</h1>
-      <p class="subtitle">Here you can preview the emails and blog posts prepared for you. Click any of them to see it in full.</p>
+      <p class="eyebrow">MegaBliss Real Estate · Content preview</p>
+      <h1>Your emails <em>&amp;</em> blog</h1>
+      <p class="subtitle">Everything we're preparing for you, in one place. Open any piece to see it exactly as your readers will, on desktop or mobile.</p>
     </header>
 
     <nav class="tabs" aria-label="Filter content">
@@ -49,13 +52,45 @@
           <button type="button" class="tab" data-width="100%" aria-pressed="true">Desktop</button>
           <button type="button" class="tab" data-width="390px" aria-pressed="false">Mobile</button>
         </div>
-        <a id="feedback" class="button" hidden>Send feedback</a>
+        <button type="button" id="feedback-open" class="button primary" hidden>Leave feedback</button>
         <a id="open" class="button" target="_blank" rel="noopener">Open in new tab ↗</a>
       </div>
     </div>
     <div class="viewer-frame">
       <iframe id="frame" title="Preview"></iframe>
     </div>
+  </div>
+
+  <!-- FEEDBACK: side panel where the client leaves a comment -->
+  <div id="drawer" class="drawer" hidden>
+    <div class="drawer-backdrop" data-close></div>
+    <aside class="drawer-panel" role="dialog" aria-modal="true" aria-labelledby="feedback-title">
+      <button type="button" class="drawer-close" data-close aria-label="Close">×</button>
+
+      <form id="feedback-form" novalidate>
+        <p class="eyebrow">Your feedback</p>
+        <h3 id="feedback-title"></h3>
+        <fieldset class="verdict">
+          <legend>What do you think?</legend>
+          <label class="choice"><input type="radio" name="verdict" value="love" /><span>♥ Love it</span></label>
+          <label class="choice"><input type="radio" name="verdict" value="changes" /><span>✎ Needs changes</span></label>
+        </fieldset>
+        <label for="fb-message">Comments</label>
+        <textarea id="fb-message" rows="5" placeholder="What would you like to keep or change?"></textarea>
+        <label for="fb-name">Your name</label>
+        <input id="fb-name" type="text" autocomplete="name" />
+        <input id="fb-botcheck" type="checkbox" class="honeypot" tabindex="-1" autocomplete="off" aria-hidden="true" />
+        <button type="submit" class="button primary send">Send feedback</button>
+        <p id="fb-status" class="status" role="status"></p>
+      </form>
+
+      <div id="feedback-done" class="done" hidden>
+        <svg viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="24" /><path d="m15 27 7 7 15-15" /></svg>
+        <h3>Thank you!</h3>
+        <p>Your feedback was sent. We'll take care of it.</p>
+        <button type="button" class="button" data-close>Back to the preview</button>
+      </div>
+    </aside>
   </div>
 
   <script src="content.js"></script>
