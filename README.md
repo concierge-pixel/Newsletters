@@ -1,7 +1,7 @@
 # Emails & Blog: preview gallery for your client
 
 A simple page where your client can see your **emails (newsletters)** and **blog posts** built with HTML and CSS.
-It is 100% static: HTML, CSS and plain JavaScript. No server, no database, no passwords.
+HTML, CSS and plain JavaScript, plus a tiny server for your Studio. No database.
 
 ## How it works
 
@@ -11,20 +11,12 @@ It is 100% static: HTML, CSS and plain JavaScript. No server, no database, no pa
 3. Your client opens the Render link and sees everything as cards. One click opens it full screen, with a **Desktop** / **Mobile** switch.
 4. She clicks **Leave feedback**, picks **Love it** or **Needs changes**, writes a comment, and it arrives in your email inbox.
 
-No server and no database: GitHub stores the files and Render publishes them.
+No database: GitHub stores the files and a tiny server on Render (`server.js`, no extra packages) publishes them.
 
 ## Studio: upload, replace and delete (admin.html)
 
-**First time only (connect to GitHub):**
-
-1. Open https://github.com/settings/personal-access-tokens/new (fine-grained token).
-2. Token name: `Newsletters uploader`. Expiration: the longest it allows.
-3. Repository access: **Only select repositories** → `concierge-pixel/Newsletters`.
-4. Permissions → Repository permissions → **Contents: Read and write**.
-5. Click **Generate token**, copy it, paste it in the Studio page and click **Connect**.
-
-The token is saved only in that browser (your client never sees it). On another computer, connect again.
-When it expires, GitHub emails you; create a new one the same way.
+Open `https://your-site.onrender.com/admin.html` and type your **Studio password** (the one saved in Render as
+`STUDIO_PASSWORD`). The browser remembers you. The GitHub token never reaches the browser: it stays on the server.
 
 **Every day:**
 
@@ -48,22 +40,25 @@ Tips:
 
 ## Render setup (one time only)
 
-In Render, create a **Static Site** (or open the existing one → **Settings → Build & Deploy**) with:
+In Render create a **Web Service** (New → Web Service) from this repository with:
 
-| Field                 | Value           |
-| --------------------- | --------------- |
-| Branch                | `main`          |
-| Root Directory        | *(empty)*       |
-| Build Command         | `npm run build` |
-| Publish Directory     | `./`            |
-| Environment Variables | *(none)*        |
+| Field              | Value                                   |
+| ------------------ | --------------------------------------- |
+| Language           | Node                                    |
+| Branch             | `main`                                  |
+| Root Directory     | *(empty)*                               |
+| Build Command      | `npm install`                           |
+| Start Command      | `npm start`                             |
+| Instance Type      | **Free**                                |
+| Health Check Path  | `/healthz` (under Advanced, optional)   |
 
-`npm run build` just runs `build.js`, which builds the file list (`content.js`) for the page.
-It installs nothing and needs no environment variables. It also works if the Build Command is left empty,
-because Render runs `npm install`, which runs `build.js` too.
+**Environment Variables** (two):
 
-> **Watch out:** Publish Directory is a **folder**, not the branch. If you put `main` there, Render fails with
-> *"Publish directory main does not exist!"*. The `main` branch goes in the **Branch** field.
+- `GITHUB_TOKEN`: create it at https://github.com/settings/personal-access-tokens/new
+  (Repository access: only `concierge-pixel/Newsletters`; Permissions → **Contents: Read and write**).
+- `STUDIO_PASSWORD`: any password you choose for the Studio.
+
+The free plan sleeps after 15 minutes without visits; the first visit after that takes about 30 seconds.
 
 ## Turning on client feedback (free, no database)
 
@@ -86,8 +81,8 @@ Her browser also remembers what she already reviewed and shows it on the cards.
 
 ## Privacy
 
-Anyone with the link can see the content (there is no password). The Studio page is public too, but it does
-nothing without your GitHub token. Previews run inside a sandbox, so code inside an uploaded HTML can't read that token.
+Anyone with the link can see the content (the client page has no password). The Studio needs your Studio password,
+and after 10 wrong tries it locks for 15 minutes. The GitHub token stays on the server, never in the browser or the code.
 The page asks Google and other search engines not to index it (`robots.txt` and `noindex`).
 If the GitHub repository is public, the files can also be seen on GitHub.
 
@@ -96,7 +91,8 @@ If the GitHub repository is public, the files can also be seen on GitHub.
 ```
 index.html     home page, viewer and feedback panel (what your client sees)
 admin.html     your Studio: upload, replace and delete files (not linked from the client page)
-admin.js       Studio logic: saves files to GitHub from the browser
+admin.js       Studio logic (talks to server.js)
+server.js      tiny web server: serves the site and saves Studio changes to GitHub with GITHUB_TOKEN
 styles.css     design, colors and animations
 app.js         plain JavaScript: cards, filters, viewer and feedback
 detect.js      decides if an HTML is an email or a blog post (used by the Studio and by build.js)
@@ -104,7 +100,7 @@ emails/        emails (the Studio saves them here)
 blog/          blog posts (the Studio saves them here)
 uploads/       files uploaded directly on GitHub; the type is detected automatically
 build.js       Render runs it: detects the type and creates the content.js list (no need to touch it)
-package.json   only defines "npm run build"
+package.json   "npm start" runs server.js; "npm install" also runs build.js
 render.yaml    the same Render settings, in case you ever create the service as a Blueprint
 robots.txt     asks search engines not to index the site
 ```

@@ -21,25 +21,18 @@
   </header>
 
   <main class="studio">
-    <!-- One-time setup: connect to GitHub -->
-    <section id="connect" class="panel" hidden>
-      <h2>Connect to GitHub <span class="muted">(one time only)</span></h2>
-      <ol class="steps">
-        <li>Open <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub → Generate new token (fine-grained)</a>.</li>
-        <li><b>Token name:</b> Newsletters uploader. <b>Expiration:</b> the longest it allows.</li>
-        <li><b>Repository access:</b> Only select repositories → <code>concierge-pixel/Newsletters</code>.</li>
-        <li><b>Permissions → Repository permissions → Contents:</b> Read and write.</li>
-        <li>Click <b>Generate token</b>, copy it and paste it below.</li>
-      </ol>
-      <form id="connect-form">
-        <label for="token">GitHub token</label>
+    <!-- Sign in with the Studio password -->
+    <section id="login" class="panel" hidden>
+      <h2>Studio password</h2>
+      <form id="login-form">
+        <label for="password">Password</label>
         <div class="inline-form">
-          <input id="token" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…" />
-          <button class="button primary" type="submit">Connect</button>
+          <input id="password" type="password" autocomplete="current-password" />
+          <button class="button primary" type="submit">Enter</button>
         </div>
-        <p id="connect-status" class="status" role="status"></p>
+        <p id="login-status" class="status" role="status"></p>
       </form>
-      <p class="note">The token is saved only in this browser. Your client never sees it.</p>
+      <p class="note">This browser will remember you. The password is the one saved in Render as <code>STUDIO_PASSWORD</code>.</p>
     </section>
 
     <!-- Upload and manage -->
@@ -72,7 +65,7 @@
         <ul id="files" class="rows"></ul>
       </div>
 
-      <p class="note">Connected to <code>concierge-pixel/Newsletters</code> · <button type="button" id="disconnect" class="link">Disconnect this browser</button></p>
+      <p class="note">Files are saved in <code>concierge-pixel/Newsletters</code> · <button type="button" id="logout" class="link">Sign out of this browser</button></p>
     </section>
   </main>
 

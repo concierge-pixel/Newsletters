@@ -1,9 +1,16 @@
-# Render settings (static site). If you created the service by hand in the dashboard,
-# use the same values under Settings: Build Command = npm run build · Publish Directory = ./
+# Render settings (Web Service). If you create the service by hand in the dashboard, use the same values:
+# Build Command = npm install · Start Command = npm start · Environment: GITHUB_TOKEN and STUDIO_PASSWORD
 services:
   - type: web
-    runtime: static
-    name: newsletters
+    runtime: node
+    name: megabliss-preview
+    plan: free
     branch: main
-    buildCommand: npm run build
-    staticPublishPath: ./
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /healthz
+    envVars:
+      - key: GITHUB_TOKEN
+        sync: false
+      - key: STUDIO_PASSWORD
+        sync: false

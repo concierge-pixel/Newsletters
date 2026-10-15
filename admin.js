@@ -1,9 +1,7 @@
 // Studio — upload, replace and delete emails/blog posts from the browser.
-// Each change is saved straight into the GitHub repository and Render republishes the site (1–2 min).
-// No server and no database: the GitHub token is kept only in this browser.
+// The server (server.js) saves each change in the GitHub repository with the token stored in Render,
+// and Render republishes the site (1–2 min). The browser only knows the Studio password.
 
-const REPO = "concierge-pixel/Newsletters";
-const BRANCH = "main";
 const FOLDERS = { emails: "email", blog: "blog", uploads: null }; // the folders build.js reads
 const SAVE_TO = { email: "emails", blog: "blog" };                // where new uploads go
 const LABELS = { email: "Email", blog: "Blog" };
@@ -13,40 +11,25 @@ const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&
 const link = (path) => path.split("/").map(encodeURIComponent).join("/");
 const published = new Map((window.CONTENT || []).map((c) => [c.path, c])); // what the client page shows now
 
-const saved = {
-  get() { try { return localStorage.getItem("studio:token") || ""; } catch { return ""; } },
-  set(value) { try { localStorage.setItem("studio:token", value); } catch { /* private mode */ } },
-  clear() { try { localStorage.removeItem("studio:token"); } catch { /* private mode */ } },
-};
-
-let token = saved.get();
 let files = [];   // files in the repository: { path, name, sha }
 let pending = []; // files dropped but not published yet
 let replacing = null;
 
-// ---------------------------------------------------------------- GitHub
-async function github(path, { method = "GET", body } = {}) {
-  const res = await fetch(`https://api.github.com/repos/${REPO}${path}`, {
+// ---------------------------------------------------------------- Server
+async function api(route, { method = "GET", body } = {}) {
+  const res = await fetch(`/api/${route}`, {
     method,
     cache: "no-store",
-    headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28" },
+    headers: body ? { "Content-Type": "application/json" } : {},
     body: body && JSON.stringify(body),
   });
-  if (res.ok) return res.status === 204 ? null : res.json();
-  if (res.status === 404 && method === "GET") return null;
   const data = await res.json().catch(() => ({}));
-  const error = new Error(explain(res.status, data.message));
+  if (res.ok) return data;
+  const error = new Error(res.status === 404 && route === "session"
+    ? "The Studio needs the Render Web Service version of this site (see README)."
+    : data.error || `Something went wrong (error ${res.status}).`);
   error.status = res.status;
   throw error;
-}
-
-function explain(status, message = "") {
-  if (status === 401) return "GitHub didn't accept the token (it may be wrong or expired). Connect again.";
-  if (status === 403 && /rate limit/i.test(message)) return "GitHub is busy right now. Try again in a few minutes.";
-  if (status === 403) return "This token can't save files. Create it with Contents set to “Read and write”.";
-  if (status === 404) return `Can't find ${REPO}. Make sure the token has access to that repository.`;
-  if (status === 409 || status === 422) return "That file changed on GitHub in the meantime. Click Refresh and try again.";
-  return `GitHub error ${status}${message ? `: ${message}` : ""}.`;
 }
 
 function toBase64(text) {
@@ -57,51 +40,43 @@ function toBase64(text) {
 }
 
 async function saveFile(path, text, sha, message) {
-  const res = await github(`/contents/${link(path)}`, {
-    method: "PUT",
-    body: { message, branch: BRANCH, content: toBase64(text), ...(sha && { sha }) },
-  });
-  const file = { path, name: res.content.name, sha: res.content.sha, title: pageTitle(text) };
+  const saved = await api("files", { method: "PUT", body: { path, content: toBase64(text), sha, message } });
+  const file = { ...saved, title: pageTitle(text) };
   files = [file, ...files.filter((f) => f.path !== path)].sort((a, b) => b.name.localeCompare(a.name));
   return file;
 }
 
 // ---------------------------------------------------------------- Screens
-function showConnect(message = "") {
+function showLogin(message = "") {
   $("#studio").hidden = true;
-  $("#connect").hidden = false;
-  $("#connect-status").textContent = message;
+  $("#login").hidden = false;
+  $("#login-status").textContent = message;
+  $("#password").focus();
 }
 
 function showStudio() {
-  $("#connect").hidden = true;
+  $("#login").hidden = true;
   $("#studio").hidden = false;
   loadFiles();
 }
 
-$("#connect-form").addEventListener("submit", async (e) => {
+$("#login-form").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const status = $("#connect-status");
-  token = $("#token").value.trim();
-  if (!token) return (status.textContent = "Paste the token first.");
+  const status = $("#login-status");
   status.textContent = "Checking…";
   try {
-    if (!(await github(""))) throw new Error(explain(404));
-    saved.set(token);
-    $("#token").value = "";
+    await api("login", { method: "POST", body: { password: $("#password").value } });
+    $("#password").value = "";
     status.textContent = "";
     showStudio();
   } catch (err) {
-    token = "";
     status.textContent = err.message;
   }
 });
 
-$("#disconnect").addEventListener("click", () => {
-  if (!confirm("Remove the GitHub token from this browser? You can connect again any time.")) return;
-  saved.clear();
-  token = "";
-  showConnect();
+$("#logout").addEventListener("click", async () => {
+  await api("logout", { method: "POST" }).catch(() => {});
+  showLogin();
 });
 
 // ---------------------------------------------------------------- Your files
@@ -113,14 +88,10 @@ const titleOf = (f) => f.title || published.get(f.path)?.title
 async function loadFiles() {
   $("#files").innerHTML = '<li class="row skeleton"></li>'.repeat(3);
   try {
-    const lists = await Promise.all(Object.keys(FOLDERS).map((dir) => github(`/contents/${dir}?ref=${BRANCH}`)));
-    files = lists.flatMap((list) => (Array.isArray(list) ? list : []))
-      .filter((f) => f.type === "file" && /\.html?$/i.test(f.name))
-      .map((f) => ({ path: f.path, name: f.name, sha: f.sha }))
-      .sort((a, b) => b.name.localeCompare(a.name));
+    files = (await api("files")).sort((a, b) => b.name.localeCompare(a.name));
     renderFiles();
   } catch (err) {
-    if (err.status === 401) return showConnect(err.message);
+    if (err.status === 401) return showLogin(err.message);
     $("#files").innerHTML = `<li class="row empty-row">${esc(err.message)}</li>`;
   }
 }
@@ -173,7 +144,7 @@ $("#replace-input").addEventListener("change", async () => {
 async function deleteFile(f) {
   if (!f || !confirm(`Delete “${titleOf(f)}”? Your client will no longer see it.`)) return;
   try {
-    await github(`/contents/${link(f.path)}`, { method: "DELETE", body: { message: `Delete: ${f.path}`, sha: f.sha, branch: BRANCH } });
+    await api("files", { method: "DELETE", body: { path: f.path, sha: f.sha } });
     files = files.filter((x) => x !== f);
     renderFiles();
     toast("Deleted ✓ It disappears from the client page in about 1–2 minutes.");
@@ -251,7 +222,7 @@ $("#publish").addEventListener("click", async () => {
       watch(path, p.text);
     } catch (err) {
       toast(err.message, true);
-      if (err.status === 401) showConnect(err.message);
+      if (err.status === 401) showLogin(err.message);
       break;
     }
   }
@@ -321,4 +292,10 @@ function toast(message, isError = false) {
   t.timer = setTimeout(() => { t.hidden = true; }, isError ? 9000 : 6000);
 }
 
-if (token) showStudio(); else showConnect();
+api("session")
+  .then(({ signedIn, configured }) => {
+    if (!configured) showLogin("Render is missing GITHUB_TOKEN or STUDIO_PASSWORD (Environment). See the README.");
+    else if (signedIn) showStudio();
+    else showLogin();
+  })
+  .catch((err) => showLogin(err.message));

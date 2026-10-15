@@ -2,9 +2,13 @@
   "name": "newsletters",
   "version": "2.0.0",
   "private": true,
-  "description": "Static gallery to show the client emails and blog posts (HTML + CSS). Published on Render as a Static Site.",
+  "description": "Preview site for the client's emails and blog posts (HTML + CSS), with a Studio to upload them. Runs on Render as a Web Service.",
   "scripts": {
+    "start": "node server.js",
     "build": "node build.js",
     "postinstall": "node build.js"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }
