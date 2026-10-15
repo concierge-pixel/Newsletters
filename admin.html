@@ -26,8 +26,8 @@
       <h2>One last step in Render</h2>
       <p>The Studio saves your files in GitHub, so Render needs a GitHub key (only once):</p>
       <ol class="steps">
-        <li>Create it at <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com → new fine-grained token</a>:
-          <b>Only select repositories</b> → <code>concierge-pixel/Newsletters</code>, and <b>Contents: Read and write</b>.</li>
+        <li>Signed in to GitHub as <code>concierge-pixel</code>, open <a href="https://github.com/settings/tokens/new?scopes=repo&amp;description=Newsletters%20Studio" target="_blank" rel="noopener">this link (new token, already filled in)</a>,
+          choose an <b>Expiration</b>, leave <b>repo</b> checked, click <b>Generate token</b> and copy it.</li>
         <li>In Render, open this Web Service → <b>Environment</b> → <b>Add Environment Variable</b>:
           key <code>GITHUB_TOKEN</code>, value = the key you copied.</li>
         <li>Click <b>Save, rebuild, and deploy</b>. When it says <b>Live</b>, reload this page.</li>

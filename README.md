@@ -58,8 +58,11 @@ In Render create a **Web Service** (New → Web Service) from this repository wi
 
 **Environment Variables:**
 
-- `GITHUB_TOKEN` (required for the Studio): create it at https://github.com/settings/personal-access-tokens/new
-  (Repository access: only `concierge-pixel/Newsletters`; Permissions → **Contents: Read and write**).
+- `GITHUB_TOKEN` (required for the Studio): signed in to GitHub as `concierge-pixel`, open
+  https://github.com/settings/tokens/new?scopes=repo&description=Newsletters%20Studio, choose an expiration,
+  leave **repo** checked and click **Generate token**.
+  (A fine-grained token also works, but it needs **Only select repositories → concierge-pixel/Newsletters** and
+  **Contents: Read and write**; the default "Public repositories" option is read-only and the Studio can't save.)
 
 The free plan sleeps after 15 minutes without visits; the first visit after that takes about 30 seconds.
 

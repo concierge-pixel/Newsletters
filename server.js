@@ -57,7 +57,7 @@ function explain(status, message = "") {
   if (status === 403 && /rate limit/i.test(message)) return "GitHub is busy right now. Try again in a few minutes.";
   if (status === 403) {
     return `GITHUB_TOKEN can't save files${message ? ` (GitHub says: “${message}”)` : ""}. `
-      + "On GitHub, edit the token: Repository access must include concierge-pixel/Newsletters and Contents must be “Read and write”.";
+      + "The token is read-only: create a new one at https://github.com/settings/tokens/new?scopes=repo and put it in Render → Environment → GITHUB_TOKEN.";
   }
   if (status === 404) return `GitHub can't find ${REPO}. Make sure GITHUB_TOKEN has access to that repository.`;
   if (status === 409 || status === 422) return "That file changed on GitHub in the meantime. Click Refresh and try again.";
