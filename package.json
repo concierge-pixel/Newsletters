@@ -1,10 +1,9 @@
 {
-  "name": "blog-review-portal",
-  "version": "1.0.0",
-  "description": "Client review and approval portal for blog drafts (GitHub + Render)",
-  "main": "server.js",
-  "type": "module",
-  "engines": { "node": ">=18" },
-  "scripts": { "start": "node server.js", "dev": "node --watch --env-file=.env server.js" },
-  "dependencies": { "express": "^4.21.0", "multer": "^1.4.5-lts.1" }
+  "name": "newsletters",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Galería estática para mostrar correos y artículos de blog (HTML + CSS) a la clienta. Se publica en Render como Static Site.",
+  "scripts": {
+    "build": "node build.js"
+  }
 }

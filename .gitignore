@@ -1,2 +1,3 @@
 node_modules
-.env
+# Lo genera Render en cada deploy (npm run build)
+contenido.js

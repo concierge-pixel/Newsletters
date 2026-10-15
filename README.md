@@ -1,49 +1,80 @@
-# Blog Review Portal
+# Correos y Blog: galería para tu clienta
 
-Your client reviews blog drafts (HTML/CSS) and approves them. Approved posts go live at `/blog/<slug>`.
+Una página sencilla donde tu clienta ve tus **correos (newsletters)** y **artículos de blog** hechos en HTML y CSS.
+Es 100% estática: HTML, CSS y JavaScript simple. No tiene servidor, base de datos ni contraseñas.
 
-## How it works
-- **You (admin password):** upload `.html` drafts, add a note, delete posts.
-- **Client (client password):** preview on desktop/mobile, comment, **Request changes** or **Approve & publish**.
-- Files are stored in a separate GitHub repo (your "content repo"):
-  - `drafts/<slug>.html` → waiting for review
-  - `published/<slug>.html` → live
-  - `meta/<slug>.json` → status, version, comments
-- Render's disk is wiped on every restart, so GitHub is the storage. Every action is a commit, which gives you full history.
-- Re-uploading a draft with the same title creates version 2, 3, and so on.
+## Cómo funciona
 
-## 1. Two GitHub repos
-1. `blog-review-portal` (this code), pushed from VS Code.
-2. `megabliss-blog-content` (empty, can be **private**). Add a README so it has a `main` branch.
+1. Subes un archivo `.html` a la carpeta **`correos/`** o **`blog/`** en GitHub.
+2. Render ve el cambio y vuelve a publicar el sitio solo (tarda 1 o 2 minutos).
+3. Tu clienta abre el link de Render y ve todo en tarjetas. Con un clic lo abre completo y puede cambiar entre **Escritorio** y **Móvil**.
 
-## 2. GitHub token
-GitHub → Settings → Developer settings → Fine-grained tokens → Generate:
-- Repository access: only `megabliss-blog-content`
-- Permissions → Contents: **Read and write**
+## Subir un correo o artículo desde el navegador
 
-## 3. Run locally in VS Code
-```bash
-npm install
-cp .env.example .env     # fill in your values
-npm run dev              # http://localhost:3000
+1. En GitHub, abre la carpeta `correos` (o `blog`).
+2. Pulsa **Add file → Upload files** y arrastra tu `.html` (y sus imágenes, si tiene).
+3. Pulsa **Commit changes**. Listo.
+
+Para borrar uno, ábrelo en GitHub y elige el menú **…** → **Delete file**.
+
+Consejos:
+
+- El título de la tarjeta sale de la etiqueta `<title>` del HTML. Si no tiene, se usa el nombre del archivo.
+- Si el nombre del archivo empieza con la fecha (`2026-10-15-newsletter-octubre.html`), la tarjeta muestra la fecha y aparece ordenada (lo más nuevo primero).
+- Imágenes: usa el link completo (`https://…`) o súbelas a la misma carpeta y usa solo el nombre (`<img src="foto.jpg">`).
+- Cada correo o artículo tiene su propio link, por ejemplo
+  `https://newsletters-0bq1.onrender.com/#correos/2026-10-15-newsletter-octubre.html`.
+  Puedes mandárselo directo a tu clienta.
+- Los archivos de ejemplo (`…-ejemplo-…`) son para que veas cómo queda; bórralos cuando subas los tuyos.
+
+## Configuración en Render (solo una vez)
+
+En Render, entra al servicio **Newsletters**, luego **Settings → Build & Deploy**, y deja esto:
+
+| Campo             | Valor           |
+| ----------------- | --------------- |
+| Branch            | `main`          |
+| Root Directory    | *(vacío)*       |
+| Build Command     | `npm run build` |
+| Publish Directory | `./`            |
+| Auto-Deploy       | On Commit (Sí)  |
+
+Guarda y pulsa **Manual Deploy → Clear build cache & deploy**.
+
+`npm run build` solo ejecuta `build.js`, que hace la lista de archivos (`contenido.js`) para la página.
+No instala nada y no necesita variables de entorno.
+
+### ¿Por qué fallaba?
+
+El servicio en Render es un **Static Site**, pero el código anterior era un **servidor Node (Express)**.
+Necesitaba un token de GitHub y contraseñas en variables de entorno, y un Static Site no puede ejecutar un servidor.
+Por eso el deploy terminaba con *"Exited with status 1 while building your code"*.
+Ahora todo es estático, y eso es justo lo que publica un Static Site.
+
+## Personalizar (opcional)
+
+- **Botón "Enviar comentarios"**: en `app.js`, línea 6, escribe tu correo entre las comillas:
+  `const CORREO_COMENTARIOS = "tu@correo.com";`
+  Tu clienta verá un botón que abre su correo con el título de la pieza ya puesto.
+- **Colores**: al principio de `estilos.css`.
+- **Textos de la portada**: en `index.html`.
+
+## Privacidad
+
+Cualquiera que tenga el link puede ver el contenido (no hay contraseña).
+La página le pide a Google y a otros buscadores que no la indexen (`robots.txt` y `noindex`).
+Si el repositorio de GitHub es público, los archivos también se pueden ver en GitHub.
+
+## Archivos
+
 ```
-
-## 4. Push to GitHub
-```bash
-git init && git add . && git commit -m "Blog review portal"
-git branch -M main
-git remote add origin https://github.com/<you>/blog-review-portal.git
-git push -u origin main
+index.html     portada y visor (lo que ve tu clienta)
+estilos.css    diseño
+app.js         JavaScript simple: tarjetas, filtros y visor
+correos/       ← aquí subes los correos .html
+blog/          ← aquí subes los artículos .html
+build.js       lo ejecuta Render: crea la lista contenido.js (no hay que tocarlo)
+package.json   solo define "npm run build"
+render.yaml    la misma configuración de Render, por si un día creas el servicio como Blueprint
+robots.txt     pide a los buscadores que no indexen el sitio
 ```
-
-## 5. Deploy on Render
-Render → New → **Blueprint** → choose the repo (it reads `render.yaml`), or New → Web Service:
-- Build: `npm install` · Start: `npm start`
-- Environment: `GITHUB_TOKEN`, `GITHUB_OWNER`, `GITHUB_REPO`, `GITHUB_BRANCH`, `ADMIN_PASSWORD`, `CLIENT_PASSWORD`, `SESSION_SECRET`
-
-Send your client the Render URL and the client password.
-
-## Notes
-- The free Render plan sleeps after 15 minutes without traffic, so the first load can take about 30 seconds.
-- Drafts load in a sandboxed iframe, so scripts inside a draft don't run. Use full image URLs (https://…) in drafts.
-- Want approved posts to appear on megablissre.com as well? Add code to the `/approve` route in `server.js` that sends the HTML to your website's platform (for example, the WordPress REST API or a webhook).

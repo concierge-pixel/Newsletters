@@ -1,22 +1,9 @@
+# Configuración de Render (sitio estático). Si creaste el servicio a mano en el panel,
+# usa estos mismos valores en Settings: Build Command = npm run build · Publish Directory = ./
 services:
   - type: web
-    name: blog-review-portal
-    runtime: node
-    plan: free
-    buildCommand: npm install
-    startCommand: npm start
-    envVars:
-      - key: GITHUB_TOKEN
-        sync: false
-      - key: GITHUB_OWNER
-        sync: false
-      - key: GITHUB_REPO
-        sync: false
-      - key: GITHUB_BRANCH
-        value: main
-      - key: ADMIN_PASSWORD
-        sync: false
-      - key: CLIENT_PASSWORD
-        sync: false
-      - key: SESSION_SECRET
-        generateValue: true
+    runtime: static
+    name: newsletters
+    branch: main
+    buildCommand: npm run build
+    staticPublishPath: ./
