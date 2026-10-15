@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Studio · Upload &amp; manage</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="studio-page">
+  <div class="glow" aria-hidden="true"><span></span><span></span></div>
+
+  <header class="header">
+    <p class="eyebrow">MegaBliss · Studio</p>
+    <h1>Upload <em>&amp;</em> manage</h1>
+    <p class="subtitle">Drop the HTML files you create. The site tells you if each one is an email or a blog post, and your client sees it in about 1–2 minutes.</p>
+    <a class="button header-link" href="./" target="_blank" rel="noopener">View client page ↗</a>
+  </header>
+
+  <main class="studio">
+    <!-- One-time setup: connect to GitHub -->
+    <section id="connect" class="panel" hidden>
+      <h2>Connect to GitHub <span class="muted">(one time only)</span></h2>
+      <ol class="steps">
+        <li>Open <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub → Generate new token (fine-grained)</a>.</li>
+        <li><b>Token name:</b> Newsletters uploader. <b>Expiration:</b> the longest it allows.</li>
+        <li><b>Repository access:</b> Only select repositories → <code>concierge-pixel/Newsletters</code>.</li>
+        <li><b>Permissions → Repository permissions → Contents:</b> Read and write.</li>
+        <li>Click <b>Generate token</b>, copy it and paste it below.</li>
+      </ol>
+      <form id="connect-form">
+        <label for="token">GitHub token</label>
+        <div class="inline-form">
+          <input id="token" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…" />
+          <button class="button primary" type="submit">Connect</button>
+        </div>
+        <p id="connect-status" class="status" role="status"></p>
+      </form>
+      <p class="note">The token is saved only in this browser. Your client never sees it.</p>
+    </section>
+
+    <!-- Upload and manage -->
+    <section id="studio" hidden>
+      <div id="live" class="live-banner" role="status" hidden></div>
+      <div id="dropzone" class="dropzone" role="button" tabindex="0" aria-label="Choose HTML files to upload">
+        <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
+          <path d="M24 31V11m0 0-8 8m8-8 8 8" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M10 29v6a4 4 0 0 0 4 4h20a4 4 0 0 0 4-4v-6" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+        </svg>
+        <strong>Drop your HTML files here</strong>
+        <span>or click to choose them</span>
+      </div>
+      <input id="file-input" type="file" accept=".html,.htm,text/html" multiple hidden />
+
+      <div id="pending" class="panel" hidden>
+        <h2>Ready to publish</h2>
+        <ul id="pending-list" class="rows"></ul>
+        <div class="panel-actions">
+          <button type="button" id="cancel" class="button">Cancel</button>
+          <button type="button" id="publish" class="button primary">Publish</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Your files</h2>
+          <button type="button" id="refresh" class="button">Refresh</button>
+        </div>
+        <ul id="files" class="rows"></ul>
+      </div>
+
+      <p class="note">Connected to <code>concierge-pixel/Newsletters</code> · <button type="button" id="disconnect" class="link">Disconnect this browser</button></p>
+    </section>
+  </main>
+
+  <input id="replace-input" type="file" accept=".html,.htm,text/html" hidden />
+  <div id="toast" class="toast" role="status" hidden></div>
+
+  <script src="content.js"></script>
+  <script src="detect.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

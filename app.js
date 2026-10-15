@@ -141,15 +141,6 @@ function setWidth(button) {
   $("#frame").style.width = button.dataset.width;
 }
 
-// Links inside an email/blog post open in a new tab instead of inside the viewer.
-$("#frame").addEventListener("load", () => {
-  try {
-    $("#frame").contentDocument.querySelectorAll("a[href]:not([target])").forEach((a) => {
-      if (!a.getAttribute("href").startsWith("#")) a.target = "_blank";
-    });
-  } catch { /* page from another domain: can't be changed */ }
-});
-
 // ---------------------------------------------------------------- Feedback
 function openFeedback() {
   if (!current) return;

@@ -5,27 +5,43 @@ It is 100% static: HTML, CSS and plain JavaScript. No server, no database, no pa
 
 ## How it works
 
-1. You upload an `.html` file (for example one made with Perplexity) to the **`uploads/`** folder on GitHub.
-2. Render sees the change and republishes the site automatically (takes 1–2 minutes).
-   It detects by itself whether each file is an **email** or a **blog post**.
+1. You open **your Studio page** (`https://your-site.onrender.com/admin.html`) and drop the `.html` files you create
+   (for example with Perplexity). It tells you right away whether each one is an **email** or a **blog post**.
+2. You click **Publish**. The file is saved in this GitHub repository and Render republishes the site (1–2 minutes).
 3. Your client opens the Render link and sees everything as cards. One click opens it full screen, with a **Desktop** / **Mobile** switch.
-4. If you turned on feedback (see below), she clicks **Leave feedback**, picks **Love it** or **Needs changes**,
-   writes a comment, and it arrives in your email inbox.
+4. She clicks **Leave feedback**, picks **Love it** or **Needs changes**, writes a comment, and it arrives in your email inbox.
 
-## Uploading an email or blog post (from the browser)
+No server and no database: GitHub stores the files and Render publishes them.
 
-1. On GitHub, open the `uploads` folder.
-2. Click **Add file → Upload files** and drag in your `.html` (plus its images, if any).
-3. Click **Commit changes**. Done.
+## Studio: upload, replace and delete (admin.html)
 
-If the site guesses the type wrong, upload that file to `emails/` or `blog/` instead: those folders force the type.
-To remove a file, open it on GitHub and choose the **…** menu → **Delete file**.
+**First time only (connect to GitHub):**
+
+1. Open https://github.com/settings/personal-access-tokens/new (fine-grained token).
+2. Token name: `Newsletters uploader`. Expiration: the longest it allows.
+3. Repository access: **Only select repositories** → `concierge-pixel/Newsletters`.
+4. Permissions → Repository permissions → **Contents: Read and write**.
+5. Click **Generate token**, copy it, paste it in the Studio page and click **Connect**.
+
+The token is saved only in that browser (your client never sees it). On another computer, connect again.
+When it expires, GitHub emails you; create a new one the same way.
+
+**Every day:**
+
+- **Upload:** drag your HTML files onto the drop area (or click it). Check the Email / Blog switch and click **Publish**.
+  New files get today's date in their name, so the newest show first.
+- **Replace:** click **Replace** on a file and choose the new version. The link your client has keeps working.
+- **Delete:** click **Delete**. It disappears from the client page.
+- A green banner tells you when the change is live on the client page.
+
+**Without the Studio:** you can also upload on GitHub directly, into the `uploads/` folder
+(**Add file → Upload files**). The type is detected automatically; `emails/` and `blog/` force the type.
 
 Tips:
 
 - The card title comes from the `<title>` tag in the HTML. If there isn't one, the file name is used.
 - If the file name starts with a date (`2026-10-15-october-newsletter.html`), the card shows that date and is sorted newest first.
-- Images: use the full link (`https://…`) or upload them to the same folder and use just the name (`<img src="photo.jpg">`).
+- Images: use full links (`https://…`), like Perplexity and Canva/Kit exports do. The Studio uploads HTML files only.
 - Every email or post has its own link, for example
   `https://your-site.onrender.com/#emails/2026-10-15-sacramento-bliss-october.html`.
   You can send it straight to your client.
@@ -70,7 +86,8 @@ Her browser also remembers what she already reviewed and shows it on the cards.
 
 ## Privacy
 
-Anyone with the link can see the content (there is no password).
+Anyone with the link can see the content (there is no password). The Studio page is public too, but it does
+nothing without your GitHub token. Previews run inside a sandbox, so code inside an uploaded HTML can't read that token.
 The page asks Google and other search engines not to index it (`robots.txt` and `noindex`).
 If the GitHub repository is public, the files can also be seen on GitHub.
 
@@ -78,11 +95,14 @@ If the GitHub repository is public, the files can also be seen on GitHub.
 
 ```
 index.html     home page, viewer and feedback panel (what your client sees)
+admin.html     your Studio: upload, replace and delete files (not linked from the client page)
+admin.js       Studio logic: saves files to GitHub from the browser
 styles.css     design, colors and animations
 app.js         plain JavaScript: cards, filters, viewer and feedback
-uploads/       ← upload your .html files here (email or blog is detected automatically)
-emails/        files here are always shown as emails
-blog/          files here are always shown as blog posts
+detect.js      decides if an HTML is an email or a blog post (used by the Studio and by build.js)
+emails/        emails (the Studio saves them here)
+blog/          blog posts (the Studio saves them here)
+uploads/       files uploaded directly on GitHub; the type is detected automatically
 build.js       Render runs it: detects the type and creates the content.js list (no need to touch it)
 package.json   only defines "npm run build"
 render.yaml    the same Render settings, in case you ever create the service as a Blueprint

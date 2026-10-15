@@ -4,6 +4,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const detectType = require("./detect.js");
 
 // null = detect automatically whether each file is an email or a blog post.
 const FOLDERS = { uploads: null, emails: "email", blog: "blog" };
@@ -15,29 +16,6 @@ function findHtml(folder) {
     if (e.isDirectory()) return findHtml(file);
     return /\.html?$/i.test(e.name) ? [file] : [];
   });
-}
-
-// Emails are built with tables, a ~600px column and Outlook tricks; blog posts look like web pages.
-function detectType(html) {
-  const has = (re) => re.test(html);
-  let email = 0;
-  let blog = 0;
-  if (has(/role=["']presentation["']/i)) email += 3;
-  if (has(/<!--\[if [^\]]*mso/i)) email += 3;
-  if (has(/\bbgcolor=/i)) email += 1;
-  if (has(/\bcellpadding=/i)) email += 1;
-  if (has(/max-width:\s*(5[5-9]|6[0-9])0px|width=["'](5[5-9]|6[0-9])0["']/i)) email += 2;
-  if (has(/unsubscribe|view (it )?in (your )?browser|manage (your )?preferences|\*\|[A-Z_]+\|\*/i)) email += 2;
-  if ((html.match(/<table\b/gi) || []).length >= 3) email += 2;
-  if (has(/<article\b/i)) blog += 3;
-  if (has(/<main\b/i)) blog += 2;
-  if (has(/<nav\b/i)) blog += 2;
-  if (has(/<section\b/i)) blog += 1;
-  if (has(/<(time|figure|blockquote)\b/i)) blog += 1;
-  if (has(/display:\s*(flex|grid)/i)) blog += 1;
-  if (has(/<script\b/i)) blog += 1;
-  if (has(/<meta[^>]+name=["']description["']/i)) blog += 1;
-  return email > blog ? "email" : "blog";
 }
 
 function decodeEntities(text) {
@@ -60,6 +38,10 @@ for (const [folder, forcedType] of Object.entries(FOLDERS)) {
     const name = path.basename(file);
     const title = decodeEntities(html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] || "").replace(/\s+/g, " ").trim();
     const type = forcedType || detectType(html);
+    // On Render: links inside each piece open in a new tab (the preview frame is sandboxed).
+    if (process.env.RENDER && !/<base\b/i.test(html)) {
+      fs.writeFileSync(file, html.replace(/<head[^>]*>/i, (head) => `${head}<base target="_blank">`));
+    }
     content.push({
       type,
       path: file.split(path.sep).join("/"),
