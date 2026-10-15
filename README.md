@@ -1,84 +1,74 @@
-# Correos y Blog: galería para tu clienta
+# Emails & Blog: preview gallery for your client
 
-Una página sencilla donde tu clienta ve tus **correos (newsletters)** y **artículos de blog** hechos en HTML y CSS.
-Es 100% estática: HTML, CSS y JavaScript simple. No tiene servidor, base de datos ni contraseñas.
+A simple page where your client can see your **emails (newsletters)** and **blog posts** built with HTML and CSS.
+It is 100% static: HTML, CSS and plain JavaScript. No server, no database, no passwords.
 
-## Cómo funciona
+## How it works
 
-1. Subes un archivo `.html` a la carpeta **`correos/`** o **`blog/`** en GitHub.
-2. Render ve el cambio y vuelve a publicar el sitio solo (tarda 1 o 2 minutos).
-3. Tu clienta abre el link de Render y ve todo en tarjetas. Con un clic lo abre completo y puede cambiar entre **Escritorio** y **Móvil**.
+1. You upload an `.html` file to the **`emails/`** or **`blog/`** folder on GitHub.
+2. Render sees the change and republishes the site automatically (takes 1–2 minutes).
+3. Your client opens the Render link and sees everything as cards. One click opens it full screen, with a **Desktop** / **Mobile** switch.
 
-## Subir un correo o artículo desde el navegador
+## Uploading an email or blog post (from the browser)
 
-1. En GitHub, abre la carpeta `correos` (o `blog`).
-2. Pulsa **Add file → Upload files** y arrastra tu `.html` (y sus imágenes, si tiene).
-3. Pulsa **Commit changes**. Listo.
+1. On GitHub, open the `emails` folder (or `blog`).
+2. Click **Add file → Upload files** and drag in your `.html` (plus its images, if any).
+3. Click **Commit changes**. Done.
 
-Para borrar uno, ábrelo en GitHub y elige el menú **…** → **Delete file**.
+To remove one, open it on GitHub and choose the **…** menu → **Delete file**.
 
-Consejos:
+Tips:
 
-- El título de la tarjeta sale de la etiqueta `<title>` del HTML. Si no tiene, se usa el nombre del archivo.
-- Si el nombre del archivo empieza con la fecha (`2026-10-15-newsletter-octubre.html`), la tarjeta muestra la fecha y aparece ordenada (lo más nuevo primero).
-- Imágenes: usa el link completo (`https://…`) o súbelas a la misma carpeta y usa solo el nombre (`<img src="foto.jpg">`).
-- Cada correo o artículo tiene su propio link, por ejemplo
-  `https://newsletters-0bq1.onrender.com/#correos/2026-10-15-newsletter-octubre.html`.
-  Puedes mandárselo directo a tu clienta.
-- Los archivos de ejemplo (`…-ejemplo-…`) son para que veas cómo queda; bórralos cuando subas los tuyos.
+- The card title comes from the `<title>` tag in the HTML. If there isn't one, the file name is used.
+- If the file name starts with a date (`2026-10-15-october-newsletter.html`), the card shows that date and is sorted newest first.
+- Images: use the full link (`https://…`) or upload them to the same folder and use just the name (`<img src="photo.jpg">`).
+- Every email or post has its own link, for example
+  `https://your-site.onrender.com/#emails/2026-10-15-sacramento-bliss-october.html`.
+  You can send it straight to your client.
 
-## Configuración en Render (solo una vez)
+## Render setup (one time only)
 
-En Render, entra al servicio **Newsletters**, luego **Settings → Build & Deploy**, y deja esto:
+In Render, create a **Static Site** (or open the existing one → **Settings → Build & Deploy**) with:
 
-| Campo             | Valor           |
-| ----------------- | --------------- |
-| Branch            | `main`          |
-| Root Directory    | *(vacío)*       |
-| Build Command     | `npm run build` |
-| Publish Directory | `./`            |
-| Auto-Deploy       | On Commit (Sí)  |
+| Field                 | Value           |
+| --------------------- | --------------- |
+| Branch                | `main`          |
+| Root Directory        | *(empty)*       |
+| Build Command         | `npm run build` |
+| Publish Directory     | `./`            |
+| Environment Variables | *(none)*        |
 
-Guarda y pulsa **Manual Deploy → Clear build cache & deploy**.
+`npm run build` just runs `build.js`, which builds the file list (`content.js`) for the page.
+It installs nothing and needs no environment variables. It also works if the Build Command is left empty,
+because Render runs `npm install`, which runs `build.js` too.
 
-`npm run build` solo ejecuta `build.js`, que hace la lista de archivos (`contenido.js`) para la página.
-No instala nada y no necesita variables de entorno. Si el Build Command queda vacío también funciona,
-porque Render ejecuta `npm install` y eso corre `build.js` igual.
+> **Watch out:** Publish Directory is a **folder**, not the branch. If you put `main` there, Render fails with
+> *"Publish directory main does not exist!"*. The `main` branch goes in the **Branch** field.
 
-> **Ojo:** Publish Directory es una **carpeta**, no la rama. Si pones `main` ahí, Render falla con
-> *"Publish directory main does not exist!"*. La rama `main` va en el campo **Branch**.
+## Customizing (optional)
 
-### ¿Por qué fallaba?
+- **"Send feedback" button**: in `app.js`, line 6, put your email between the quotes:
+  `const FEEDBACK_EMAIL = "you@example.com";`
+  Your client will see a button that opens their email app with the post title already filled in.
+- **Colors**: at the top of `styles.css`.
+- **Home page text**: in `index.html`.
 
-El servicio en Render es un **Static Site**, pero el código anterior era un **servidor Node (Express)**.
-Necesitaba un token de GitHub y contraseñas en variables de entorno, y un Static Site no puede ejecutar un servidor.
-Por eso el deploy terminaba con *"Exited with status 1 while building your code"*.
-Ahora todo es estático, y eso es justo lo que publica un Static Site.
+## Privacy
 
-## Personalizar (opcional)
+Anyone with the link can see the content (there is no password).
+The page asks Google and other search engines not to index it (`robots.txt` and `noindex`).
+If the GitHub repository is public, the files can also be seen on GitHub.
 
-- **Botón "Enviar comentarios"**: en `app.js`, línea 6, escribe tu correo entre las comillas:
-  `const CORREO_COMENTARIOS = "tu@correo.com";`
-  Tu clienta verá un botón que abre su correo con el título de la pieza ya puesto.
-- **Colores**: al principio de `estilos.css`.
-- **Textos de la portada**: en `index.html`.
-
-## Privacidad
-
-Cualquiera que tenga el link puede ver el contenido (no hay contraseña).
-La página le pide a Google y a otros buscadores que no la indexen (`robots.txt` y `noindex`).
-Si el repositorio de GitHub es público, los archivos también se pueden ver en GitHub.
-
-## Archivos
+## Files
 
 ```
-index.html     portada y visor (lo que ve tu clienta)
-estilos.css    diseño
-app.js         JavaScript simple: tarjetas, filtros y visor
-correos/       ← aquí subes los correos .html
-blog/          ← aquí subes los artículos .html
-build.js       lo ejecuta Render: crea la lista contenido.js (no hay que tocarlo)
-package.json   solo define "npm run build"
-render.yaml    la misma configuración de Render, por si un día creas el servicio como Blueprint
-robots.txt     pide a los buscadores que no indexen el sitio
+index.html     home page and viewer (what your client sees)
+styles.css     design
+app.js         plain JavaScript: cards, filters and viewer
+emails/        ← upload your email .html files here
+blog/          ← upload your blog post .html files here
+build.js       Render runs it: creates the content.js list (no need to touch it)
+package.json   only defines "npm run build"
+render.yaml    the same Render settings, in case you ever create the service as a Blueprint
+robots.txt     asks search engines not to index the site
 ```

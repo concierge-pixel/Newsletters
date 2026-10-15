@@ -1,64 +1,64 @@
 <!doctype html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex, nofollow" />
-  <title>Correos y Blog · Revisión</title>
+  <title>Emails &amp; Blog · Review</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="estilos.css" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <!-- PORTADA: lista de correos y artículos -->
-  <div id="portada">
-    <header class="cabecera">
+  <!-- HOME: list of emails and blog posts -->
+  <div id="home">
+    <header class="header">
       <svg class="logo" viewBox="0 0 40 40" fill="none" aria-hidden="true">
         <rect x="6" y="5" width="22" height="30" rx="3" stroke="currentColor" stroke-width="2.5" />
         <path d="M12 14h10M12 20h10M12 26h5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
-        <circle cx="30" cy="28" r="7" fill="var(--acento)" />
+        <circle cx="30" cy="28" r="7" fill="var(--accent)" />
         <path d="m27 28 2 2 4-4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
       </svg>
-      <h1>Correos y Blog</h1>
-      <p class="subtitulo">Aquí puedes ver los correos y artículos preparados para ti. Haz clic en cualquiera para verlo completo.</p>
+      <h1>Emails &amp; Blog</h1>
+      <p class="subtitle">Here you can preview the emails and blog posts prepared for you. Click any of them to see it in full.</p>
     </header>
 
-    <nav class="pestanas" aria-label="Filtrar contenido">
-      <button type="button" class="pestana" data-filtro="todo" aria-pressed="true">Todo <span></span></button>
-      <button type="button" class="pestana" data-filtro="correo" aria-pressed="false">Correos <span></span></button>
-      <button type="button" class="pestana" data-filtro="blog" aria-pressed="false">Blog <span></span></button>
+    <nav class="tabs" aria-label="Filter content">
+      <button type="button" class="tab" data-filter="all" aria-pressed="true">All <span></span></button>
+      <button type="button" class="tab" data-filter="email" aria-pressed="false">Emails <span></span></button>
+      <button type="button" class="tab" data-filter="blog" aria-pressed="false">Blog <span></span></button>
     </nav>
 
     <main>
-      <div id="lista" class="rejilla"></div>
-      <p id="vacio" class="vacio" hidden></p>
+      <div id="list" class="grid"></div>
+      <p id="empty" class="empty" hidden></p>
     </main>
   </div>
 
-  <!-- VISOR: un correo o artículo a pantalla completa -->
-  <div id="visor" class="visor" hidden>
-    <div class="visor-barra">
-      <button type="button" id="cerrar" class="boton">← Volver</button>
-      <div class="visor-titulo">
-        <span id="visor-etiqueta" class="etiqueta"></span>
-        <h2 id="visor-nombre"></h2>
+  <!-- VIEWER: one email or blog post, full screen -->
+  <div id="viewer" class="viewer" hidden>
+    <div class="viewer-bar">
+      <button type="button" id="back" class="button">← Back</button>
+      <div class="viewer-heading">
+        <span id="viewer-tag" class="tag"></span>
+        <h2 id="viewer-title"></h2>
       </div>
-      <div class="visor-acciones">
-        <div class="dispositivo" role="group" aria-label="Tamaño de pantalla">
-          <button type="button" class="pestana" data-ancho="100%" aria-pressed="true">Escritorio</button>
-          <button type="button" class="pestana" data-ancho="390px" aria-pressed="false">Móvil</button>
+      <div class="viewer-actions">
+        <div class="device" role="group" aria-label="Screen size">
+          <button type="button" class="tab" data-width="100%" aria-pressed="true">Desktop</button>
+          <button type="button" class="tab" data-width="390px" aria-pressed="false">Mobile</button>
         </div>
-        <a id="comentar" class="boton" hidden>Enviar comentarios</a>
-        <a id="abrir" class="boton" target="_blank" rel="noopener">Abrir en pestaña nueva ↗</a>
+        <a id="feedback" class="button" hidden>Send feedback</a>
+        <a id="open" class="button" target="_blank" rel="noopener">Open in new tab ↗</a>
       </div>
     </div>
-    <div class="visor-marco">
-      <iframe id="marco" title="Vista previa"></iframe>
+    <div class="viewer-frame">
+      <iframe id="frame" title="Preview"></iframe>
     </div>
   </div>
 
-  <script src="contenido.js"></script>
+  <script src="content.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

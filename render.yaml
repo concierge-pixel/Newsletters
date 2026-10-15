@@ -1,5 +1,5 @@
-# Configuración de Render (sitio estático). Si creaste el servicio a mano en el panel,
-# usa estos mismos valores en Settings: Build Command = npm run build · Publish Directory = ./
+# Render settings (static site). If you created the service by hand in the dashboard,
+# use the same values under Settings: Build Command = npm run build · Publish Directory = ./
 services:
   - type: web
     runtime: static

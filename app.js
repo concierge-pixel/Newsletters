@@ -1,131 +1,132 @@
-// Correos y Blog — JavaScript simple, sin base de datos.
-// La lista de archivos viene de contenido.js, que Render genera con build.js en cada deploy.
+// Emails & Blog — simple JavaScript, no database.
+// The list of files comes from content.js, which Render generates with build.js on every deploy.
 
-// Opcional: escribe tu correo entre las comillas (ej. "hola@tumarca.com") para que tu clienta
-// tenga un botón "Enviar comentarios" en cada correo/artículo. Vacío = el botón no aparece.
-const CORREO_COMENTARIOS = "";
+// Optional: put your email between the quotes (e.g. "hello@yourbrand.com") so your client gets
+// a "Send feedback" button on every email/blog post. Empty = the button is hidden.
+const FEEDBACK_EMAIL = "";
 
-const NOMBRES = { correo: "Correo", blog: "Blog" };
-const ANCHO_MINIATURA = { correo: 700, blog: 1280 }; // ancho "real" al que se dibuja cada miniatura
-const contenido = Array.isArray(window.CONTENIDO) ? window.CONTENIDO : null;
+const LABELS = { email: "Email", blog: "Blog" };
+const THUMB_WIDTH = { email: 700, blog: 1280 }; // "real" width each thumbnail is drawn at
+const PAGE_TITLE = document.title;
+const content = Array.isArray(window.CONTENT) ? window.CONTENT : null;
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const enlace = (ruta) => ruta.split("/").map(encodeURIComponent).join("/");
-const fechaBonita = (f) => new Date(`${f}T12:00:00`).toLocaleDateString("es", { day: "numeric", month: "long", year: "numeric" });
+const link = (path) => path.split("/").map(encodeURIComponent).join("/");
+const formatDate = (d) => new Date(`${d}T12:00:00`).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 
-// ---------------------------------------------------------------- Portada
-function pintarPortada() {
-  if (!contenido) {
-    return mostrarVacio("No se encontró la lista de contenido. En Render, el Build Command debe ser: npm run build");
+// ---------------------------------------------------------------- Home
+function renderHome() {
+  if (!content) {
+    return showEmpty("The content list was not found. In Render, the Build Command should be: npm run build");
   }
-  $("#lista").innerHTML = contenido.map((c) => `
-    <a class="tarjeta" data-tipo="${c.tipo}" href="#${enlace(c.ruta)}">
-      <div class="miniatura" data-ancho="${ANCHO_MINIATURA[c.tipo]}">
-        <iframe src="${enlace(c.ruta)}" loading="lazy" sandbox tabindex="-1" aria-hidden="true" scrolling="no"></iframe>
+  $("#list").innerHTML = content.map((c) => `
+    <a class="card" data-type="${c.type}" href="#${link(c.path)}">
+      <div class="thumb" data-width="${THUMB_WIDTH[c.type]}">
+        <iframe src="${link(c.path)}" loading="lazy" sandbox tabindex="-1" aria-hidden="true" scrolling="no"></iframe>
       </div>
-      <div class="tarjeta-info">
-        <span class="etiqueta ${c.tipo}">${NOMBRES[c.tipo]}</span>
-        <h3>${esc(c.titulo)}</h3>
-        ${c.fecha ? `<time datetime="${c.fecha}">${fechaBonita(c.fecha)}</time>` : ""}
+      <div class="card-info">
+        <span class="tag ${c.type}">${LABELS[c.type]}</span>
+        <h3>${esc(c.title)}</h3>
+        ${c.date ? `<time datetime="${c.date}">${formatDate(c.date)}</time>` : ""}
       </div>
     </a>`).join("");
 
-  document.querySelectorAll("[data-filtro]").forEach((b) => {
-    const tipo = b.dataset.filtro;
-    b.querySelector("span").textContent = contenido.filter((c) => tipo === "todo" || c.tipo === tipo).length;
-    b.addEventListener("click", () => filtrar(tipo));
+  document.querySelectorAll("[data-filter]").forEach((b) => {
+    const type = b.dataset.filter;
+    b.querySelector("span").textContent = content.filter((c) => type === "all" || c.type === type).length;
+    b.addEventListener("click", () => filter(type));
   });
-  document.querySelectorAll(".miniatura").forEach((m) => escalarMiniaturas.observe(m));
-  filtrar("todo");
+  document.querySelectorAll(".thumb").forEach((t) => scaleThumbs.observe(t));
+  filter("all");
 }
 
-function filtrar(tipo) {
-  document.querySelectorAll("[data-filtro]").forEach((b) => b.setAttribute("aria-pressed", b.dataset.filtro === tipo));
-  let visibles = 0;
-  document.querySelectorAll(".tarjeta").forEach((t) => {
-    t.hidden = tipo !== "todo" && t.dataset.tipo !== tipo;
-    if (!t.hidden) visibles++;
+function filter(type) {
+  document.querySelectorAll("[data-filter]").forEach((b) => b.setAttribute("aria-pressed", b.dataset.filter === type));
+  let visible = 0;
+  document.querySelectorAll(".card").forEach((card) => {
+    card.hidden = type !== "all" && card.dataset.type !== type;
+    if (!card.hidden) visible++;
   });
-  mostrarVacio(visibles ? "" : { correo: "Todavía no hay correos.", blog: "Todavía no hay artículos de blog." }[tipo] || "Todavía no hay contenido.");
+  showEmpty(visible ? "" : { email: "No emails yet.", blog: "No blog posts yet." }[type] || "Nothing here yet.");
 }
 
-function mostrarVacio(texto) {
-  $("#vacio").textContent = texto;
-  $("#vacio").hidden = !texto;
+function showEmpty(text) {
+  $("#empty").textContent = text;
+  $("#empty").hidden = !text;
 }
 
-// Cada miniatura dibuja la página a tamaño real y la reduce para que quepa en la tarjeta.
-const escalarMiniaturas = new ResizeObserver((cambios) => cambios.forEach(({ target }) => {
-  const ancho = Number(target.dataset.ancho);
-  const escala = target.clientWidth / ancho;
-  if (!escala) return;
+// Each thumbnail draws the page at full size and scales it down to fit the card.
+const scaleThumbs = new ResizeObserver((changes) => changes.forEach(({ target }) => {
+  const width = Number(target.dataset.width);
+  const scale = target.clientWidth / width;
+  if (!scale) return;
   Object.assign(target.querySelector("iframe").style, {
-    width: `${ancho}px`, height: `${target.clientHeight / escala}px`, transform: `scale(${escala})`,
+    width: `${width}px`, height: `${target.clientHeight / scale}px`, transform: `scale(${scale})`,
   });
 }));
 
-// ---------------------------------------------------------------- Visor
-let vinoDeLaPortada = false;
-let scrollPortada = 0;
+// ---------------------------------------------------------------- Viewer
+let cameFromHome = false;
+let homeScroll = 0;
 
-function abrirVisor(item) {
-  if ($("#visor").hidden) scrollPortada = window.scrollY;
-  $("#portada").hidden = true;
-  $("#visor").hidden = false;
-  $("#visor-etiqueta").textContent = NOMBRES[item.tipo];
-  $("#visor-etiqueta").className = `etiqueta ${item.tipo}`;
-  $("#visor-nombre").textContent = item.titulo;
-  document.title = `${item.titulo} · Correos y Blog`;
-  $("#abrir").href = enlace(item.ruta);
-  $("#comentar").hidden = !CORREO_COMENTARIOS;
-  $("#comentar").href = `mailto:${CORREO_COMENTARIOS}?subject=${encodeURIComponent(`Comentarios: ${item.titulo}`)}&body=${encodeURIComponent(`${location.href}\n\n`)}`;
-  $("#marco").src = enlace(item.ruta);
+function openViewer(item) {
+  if ($("#viewer").hidden) homeScroll = window.scrollY;
+  $("#home").hidden = true;
+  $("#viewer").hidden = false;
+  $("#viewer-tag").textContent = LABELS[item.type];
+  $("#viewer-tag").className = `tag ${item.type}`;
+  $("#viewer-title").textContent = item.title;
+  document.title = `${item.title} · Emails & Blog`;
+  $("#open").href = link(item.path);
+  $("#feedback").hidden = !FEEDBACK_EMAIL;
+  $("#feedback").href = `mailto:${FEEDBACK_EMAIL}?subject=${encodeURIComponent(`Feedback: ${item.title}`)}&body=${encodeURIComponent(`${location.href}\n\n`)}`;
+  $("#frame").src = link(item.path);
 }
 
-function cerrarVisor() {
-  vinoDeLaPortada = false;
-  if ($("#visor").hidden) return;
-  $("#visor").hidden = true;
-  $("#portada").hidden = false;
-  $("#marco").src = "about:blank";
-  document.title = "Correos y Blog · Revisión";
-  window.scrollTo(0, scrollPortada);
+function closeViewer() {
+  cameFromHome = false;
+  if ($("#viewer").hidden) return;
+  $("#viewer").hidden = true;
+  $("#home").hidden = false;
+  $("#frame").src = "about:blank";
+  document.title = PAGE_TITLE;
+  window.scrollTo(0, homeScroll);
 }
 
-// La dirección (#correos/archivo.html) decide qué se muestra, así cada correo tiene su propio link.
-function segunLaDireccion() {
-  let ruta = "";
-  try { ruta = decodeURIComponent(location.hash.slice(1)); } catch { /* dirección mal escrita */ }
-  const item = contenido && contenido.find((c) => c.ruta === ruta);
-  if (item) abrirVisor(item); else cerrarVisor();
+// The address (#emails/file.html) decides what is shown, so every email has its own link.
+function route() {
+  let path = "";
+  try { path = decodeURIComponent(location.hash.slice(1)); } catch { /* malformed address */ }
+  const item = content && content.find((c) => c.path === path);
+  if (item) openViewer(item); else closeViewer();
 }
 
-function volver() {
-  if (vinoDeLaPortada) return history.back();
+function goBack() {
+  if (cameFromHome) return history.back();
   history.replaceState(null, "", location.pathname + location.search);
-  cerrarVisor();
+  closeViewer();
 }
 
-function ponerAncho(boton) {
-  document.querySelectorAll(".dispositivo [data-ancho]").forEach((b) => b.setAttribute("aria-pressed", b === boton));
-  $("#marco").style.width = boton.dataset.ancho;
+function setWidth(button) {
+  document.querySelectorAll(".device [data-width]").forEach((b) => b.setAttribute("aria-pressed", b === button));
+  $("#frame").style.width = button.dataset.width;
 }
 
-// Los enlaces dentro de un correo/artículo se abren en otra pestaña en lugar de dentro del visor.
-$("#marco").addEventListener("load", () => {
+// Links inside an email/blog post open in a new tab instead of inside the viewer.
+$("#frame").addEventListener("load", () => {
   try {
-    $("#marco").contentDocument.querySelectorAll("a[href]:not([target])").forEach((a) => {
+    $("#frame").contentDocument.querySelectorAll("a[href]:not([target])").forEach((a) => {
       if (!a.getAttribute("href").startsWith("#")) a.target = "_blank";
     });
-  } catch { /* página de otro dominio: no se puede modificar */ }
+  } catch { /* page from another domain: can't be changed */ }
 });
 
-$("#lista").addEventListener("click", (e) => { if (e.target.closest(".tarjeta")) vinoDeLaPortada = true; });
-$("#cerrar").addEventListener("click", volver);
-document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("#visor").hidden) volver(); });
-document.querySelectorAll(".dispositivo [data-ancho]").forEach((b) => b.addEventListener("click", () => ponerAncho(b)));
-window.addEventListener("hashchange", segunLaDireccion);
+$("#list").addEventListener("click", (e) => { if (e.target.closest(".card")) cameFromHome = true; });
+$("#back").addEventListener("click", goBack);
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("#viewer").hidden) goBack(); });
+document.querySelectorAll(".device [data-width]").forEach((b) => b.addEventListener("click", () => setWidth(b)));
+window.addEventListener("hashchange", route);
 
-pintarPortada();
-segunLaDireccion();
+renderHome();
+route();

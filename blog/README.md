@@ -1,3 +1,3 @@
 # Blog
 
-Sube aquí tus artículos de blog (`.html`) con **Add file → Upload files**.
+Upload your blog posts (`.html`) here with **Add file → Upload files**.
