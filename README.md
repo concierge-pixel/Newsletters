@@ -42,7 +42,11 @@ En Render, entra al servicio **Newsletters**, luego **Settings → Build & Deplo
 Guarda y pulsa **Manual Deploy → Clear build cache & deploy**.
 
 `npm run build` solo ejecuta `build.js`, que hace la lista de archivos (`contenido.js`) para la página.
-No instala nada y no necesita variables de entorno.
+No instala nada y no necesita variables de entorno. Si el Build Command queda vacío también funciona,
+porque Render ejecuta `npm install` y eso corre `build.js` igual.
+
+> **Ojo:** Publish Directory es una **carpeta**, no la rama. Si pones `main` ahí, Render falla con
+> *"Publish directory main does not exist!"*. La rama `main` va en el campo **Branch**.
 
 ### ¿Por qué fallaba?
 

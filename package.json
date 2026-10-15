@@ -4,6 +4,7 @@
   "private": true,
   "description": "Galería estática para mostrar correos y artículos de blog (HTML + CSS) a la clienta. Se publica en Render como Static Site.",
   "scripts": {
-    "build": "node build.js"
+    "build": "node build.js",
+    "postinstall": "node build.js"
   }
 }
