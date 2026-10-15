@@ -15,7 +15,8 @@ No database: GitHub stores the files and a tiny server on Render (`server.js`, n
 
 ## Studio: upload, replace and delete (admin.html)
 
-Open `https://your-site.onrender.com/admin.html`, or click **Upload files (Studio)** at the bottom of the client page.
+Use the top bar to switch between **Preview** (what your client sees) and **Studio** (`/admin.html`).
+While previewing a piece, **↻ Replace** takes you to the Studio with that file highlighted.
 It is open to anyone with the link (no password). The GitHub token never reaches the browser: it stays on the server.
 
 **Every day:**

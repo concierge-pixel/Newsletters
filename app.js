@@ -106,6 +106,7 @@ function openViewer(item) {
   $("#viewer-title").textContent = item.title;
   document.title = `${item.title} · MegaBliss`;
   $("#open").href = link(item.path);
+  $("#replace-link").href = `admin.html#${link(item.path)}`;
   $("#feedback-open").hidden = !FEEDBACK_KEY;
   $("#frame").src = link(item.path);
 }

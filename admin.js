@@ -70,16 +70,17 @@ async function loadFiles() {
   try {
     files = (await api("files")).sort((a, b) => b.name.localeCompare(a.name));
     renderFiles();
+    focusFromLink();
   } catch (err) {
     $("#files").innerHTML = `<li class="row empty-row">${esc(err.message)}</li>`;
   }
 }
 
-function renderFiles(highlight = "") {
+function renderFiles(highlight = "", mark = "saved") {
   $("#files").innerHTML = files.length ? files.map((f, i) => {
     const type = typeOf(f);
     return `
-      <li class="row${f.path === highlight ? " saved" : ""}" data-path="${esc(f.path)}" style="--i: ${Math.min(i, 12)}">
+      <li class="row${f.path === highlight ? ` ${mark}` : ""}" data-path="${esc(f.path)}" style="--i: ${Math.min(i, 12)}">
         <span class="tag ${type}">${LABELS[type] || "Auto"}</span>
         <div class="row-main"><strong>${esc(titleOf(f))}</strong><small>${esc(f.path)}</small></div>
         <div class="row-buttons">
@@ -92,6 +93,18 @@ function renderFiles(highlight = "") {
 }
 
 $("#refresh").addEventListener("click", loadFiles);
+
+// Coming from "↻ Replace" on the preview page (admin.html#emails/file.html): point at that file.
+function focusFromLink() {
+  let path = "";
+  try { path = decodeURIComponent(location.hash.slice(1)); } catch { /* malformed address */ }
+  const target = files.find((f) => f.path === path);
+  history.replaceState(null, "", location.pathname);
+  if (!target) return;
+  renderFiles(path, "focus");
+  $(`#files [data-path="${CSS.escape(path)}"]`).scrollIntoView({ behavior: "smooth", block: "center" });
+  toast(`Click ↻ Replace on “${titleOf(target)}”, or drop the new version onto it.`);
+}
 
 $("#files").addEventListener("click", (e) => {
   const replace = e.target.closest("[data-replace]");

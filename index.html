@@ -13,15 +13,33 @@
 <body>
   <div class="glow" aria-hidden="true"><span></span><span></span></div>
 
+  <nav class="topnav" aria-label="Main">
+    <div class="topnav-inner">
+      <a class="topnav-brand" href="./">
+        <svg viewBox="0 0 40 40" fill="none" aria-hidden="true">
+          <rect x="6" y="5" width="22" height="30" rx="3" stroke="currentColor" stroke-width="2.5" />
+          <path d="M12 14h10M12 20h10M12 26h5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+          <circle cx="30" cy="28" r="7" fill="currentColor" />
+          <path d="m27 28 2 2 4-4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        MegaBliss
+      </a>
+      <div class="topnav-links">
+        <a href="./" aria-current="page">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" stroke="currentColor" stroke-width="2" /><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2" /></svg>
+          Preview
+        </a>
+        <a href="admin.html">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 16V4m0 0-5 5m5-5 5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
+          Studio
+        </a>
+      </div>
+    </div>
+  </nav>
+
   <!-- HOME: list of emails and blog posts -->
   <div id="home">
     <header class="header">
-      <svg class="logo" viewBox="0 0 40 40" fill="none" aria-hidden="true">
-        <rect x="6" y="5" width="22" height="30" rx="3" stroke="currentColor" stroke-width="2.5" />
-        <path d="M12 14h10M12 20h10M12 26h5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
-        <circle cx="30" cy="28" r="7" fill="var(--accent)" />
-        <path d="m27 28 2 2 4-4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-      </svg>
       <p class="eyebrow">MegaBliss Real Estate · Content preview</p>
       <h1>Your emails <em>&amp;</em> blog</h1>
       <p class="subtitle">Everything we're preparing for you, in one place. Open any piece to see it exactly as your readers will, on desktop or mobile.</p>
@@ -37,7 +55,6 @@
       <div id="list" class="grid"></div>
       <p id="empty" class="empty" hidden></p>
     </main>
-    <footer class="footer"><a href="admin.html">Upload files (Studio) →</a></footer>
   </div>
 
   <!-- VIEWER: one email or blog post, full screen -->
@@ -54,6 +71,7 @@
           <button type="button" class="tab" data-width="390px" aria-pressed="false">Mobile</button>
         </div>
         <button type="button" id="feedback-open" class="button primary" hidden>Leave feedback</button>
+        <a id="replace-link" class="button replace" href="admin.html"><span class="ico" aria-hidden="true">↻</span> Replace</a>
         <a id="open" class="button" target="_blank" rel="noopener">Open in new tab ↗</a>
       </div>
     </div>
