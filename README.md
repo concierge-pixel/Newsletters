@@ -22,7 +22,11 @@ It is open to anyone with the link (no password). The GitHub token never reaches
 
 - **Upload:** drag your HTML files onto the drop area (or click it). Check the Email / Blog switch and click **Publish**.
   New files get today's date in their name, so the newest show first.
-- **Replace:** click **Replace** on a file and choose the new version. The link your client has keeps working.
+- **Replace:** three ways, and the link your client has keeps working:
+  - click **↻ Replace** on a file and choose the new version;
+  - drag the new version straight onto that file in **Your files**;
+  - or just upload it: if it has the same title as an existing piece, the Studio offers to replace it
+    (you can also pick which one to replace, or keep it as a new file).
 - **Delete:** click **Delete**. It disappears from the client page.
 - A green banner tells you when the change is live on the client page.
 

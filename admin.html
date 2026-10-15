@@ -39,12 +39,15 @@
     <section id="studio" hidden>
       <div id="live" class="live-banner" role="status" hidden></div>
       <div id="dropzone" class="dropzone" role="button" tabindex="0" aria-label="Choose HTML files to upload">
-        <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
-          <path d="M24 31V11m0 0-8 8m8-8 8 8" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-          <path d="M10 29v6a4 4 0 0 0 4 4h20a4 4 0 0 0 4-4v-6" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
-        </svg>
-        <strong>Drop your HTML files here</strong>
-        <span>or click to choose them</span>
+        <span class="drop-icon" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none">
+            <path d="M24 31V12m0 0-8 8m8-8 8 8" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M12 29v5a4 4 0 0 0 4 4h16a4 4 0 0 0 4-4v-5" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" />
+          </svg>
+        </span>
+        <strong><span class="when-idle">Drop your HTML files here</span><span class="when-over">Release to upload ✨</span></strong>
+        <span class="drop-sub">Emails or blog posts: we'll tell you which is which</span>
+        <span class="button primary drop-button">Choose files</span>
       </div>
       <input id="file-input" type="file" accept=".html,.htm,text/html" multiple hidden />
 
@@ -62,6 +65,7 @@
           <h2>Your files</h2>
           <button type="button" id="refresh" class="button">Refresh</button>
         </div>
+        <p class="hint">Tip: drag a new version onto any file to replace it. Your client's link stays the same.</p>
         <ul id="files" class="rows"></ul>
       </div>
 

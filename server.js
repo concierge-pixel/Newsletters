@@ -55,7 +55,10 @@ async function github(apiPath, { method = "GET", body } = {}) {
 function explain(status, message = "") {
   if (status === 401) return "GitHub didn't accept GITHUB_TOKEN (it may be wrong or expired). Update it in Render → Environment.";
   if (status === 403 && /rate limit/i.test(message)) return "GitHub is busy right now. Try again in a few minutes.";
-  if (status === 403) return "GITHUB_TOKEN can't save files. Create it with Contents set to “Read and write”.";
+  if (status === 403) {
+    return `GITHUB_TOKEN can't save files${message ? ` (GitHub says: “${message}”)` : ""}. `
+      + "On GitHub, edit the token: Repository access must include concierge-pixel/Newsletters and Contents must be “Read and write”.";
+  }
   if (status === 404) return `GitHub can't find ${REPO}. Make sure GITHUB_TOKEN has access to that repository.`;
   if (status === 409 || status === 422) return "That file changed on GitHub in the meantime. Click Refresh and try again.";
   return `GitHub error ${status}${message ? `: ${message}` : ""}.`;

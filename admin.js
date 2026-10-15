@@ -75,16 +75,16 @@ async function loadFiles() {
   }
 }
 
-function renderFiles() {
+function renderFiles(highlight = "") {
   $("#files").innerHTML = files.length ? files.map((f, i) => {
     const type = typeOf(f);
     return `
-      <li class="row" style="--i: ${Math.min(i, 12)}">
+      <li class="row${f.path === highlight ? " saved" : ""}" data-path="${esc(f.path)}" style="--i: ${Math.min(i, 12)}">
         <span class="tag ${type}">${LABELS[type] || "Auto"}</span>
         <div class="row-main"><strong>${esc(titleOf(f))}</strong><small>${esc(f.path)}</small></div>
         <div class="row-buttons">
-          <a class="button" href="./#${link(f.path)}" target="_blank" rel="noopener">View</a>
-          <button type="button" class="button" data-replace="${esc(f.path)}">Replace</button>
+          <a class="button view" href="./#${link(f.path)}" target="_blank" rel="noopener">View <span class="ico" aria-hidden="true">↗</span></a>
+          <button type="button" class="button replace" data-replace="${esc(f.path)}"><span class="ico" aria-hidden="true">↻</span> Replace</button>
           <button type="button" class="button danger" data-delete="${esc(f.path)}">Delete</button>
         </div>
       </li>`;
@@ -105,18 +105,49 @@ $("#files").addEventListener("click", (e) => {
 });
 
 // Replace keeps the same file name, so the link your client has keeps working.
-$("#replace-input").addEventListener("change", async () => {
-  const file = $("#replace-input").files[0];
-  if (!file || !replacing) return;
-  const target = replacing;
+async function replaceFile(target, file) {
+  if (!/\.html?$/i.test(file.name)) return toast(`“${file.name}” is not an HTML file.`, true);
+  const row = $(`#files [data-path="${CSS.escape(target.path)}"]`);
+  row?.classList.add("busy");
   try {
     const text = await file.text();
     await saveFile(target.path, text, target.sha, `Replace: ${target.path}`);
-    renderFiles();
+    renderFiles(target.path);
     toast(`“${titleOf(target)}” replaced ✓ Your client will see the new version in about 1–2 minutes.`);
     watch(target.path, text);
   } catch (err) {
+    row?.classList.remove("busy");
     toast(err.message, true);
+  }
+}
+
+$("#replace-input").addEventListener("change", () => {
+  const file = $("#replace-input").files[0];
+  if (file && replacing) replaceFile(replacing, file);
+});
+
+// Drop a new version straight onto a file in the list to replace it.
+const rowUnder = (e) => e.target.closest("#files [data-path]");
+$("#files").addEventListener("dragover", (e) => {
+  const row = rowUnder(e);
+  if (!row) return;
+  e.preventDefault();
+  document.querySelectorAll("#files .drop-target").forEach((r) => r !== row && r.classList.remove("drop-target"));
+  row.classList.add("drop-target");
+});
+$("#files").addEventListener("dragleave", (e) => {
+  const row = rowUnder(e);
+  if (row && !row.contains(e.relatedTarget)) row.classList.remove("drop-target");
+});
+$("#files").addEventListener("drop", (e) => {
+  const row = rowUnder(e);
+  if (!row) return;
+  e.preventDefault();
+  row.classList.remove("drop-target");
+  const target = files.find((f) => f.path === row.dataset.path);
+  const file = e.dataTransfer.files[0];
+  if (target && file && confirm(`Replace “${titleOf(target)}” with “${file.name}”? Your client's link stays the same.`)) {
+    replaceFile(target, file);
   }
 });
 
@@ -136,12 +167,19 @@ async function deleteFile(f) {
 // ---------------------------------------------------------------- New uploads
 // "My Newsletter (1).html" → "2026-10-16-my-newsletter-1.html" (the date sorts it and shows on the card)
 function cleanName(name) {
-  const base = name.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/\.html?$/, "")
+  const base = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\.html?$/, "")
     .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "untitled";
   return /^\d{4}-\d{2}-\d{2}/.test(base) ? `${base}.html` : `${new Date().toLocaleDateString("en-CA")}-${base}.html`;
 }
 
-const targetPath = (p) => `${SAVE_TO[p.type]}/${p.name}`;
+const targetPath = (p) => p.target || `${SAVE_TO[p.type]}/${p.name}`;
+
+// A new upload with the same title (or file name) as an existing piece is offered as a replacement.
+const baseName = (name) => name.replace(/\.html?$/i, "").replace(/^\d{4}-\d{2}-\d{2}-?/, "");
+function suggestTarget(title, name) {
+  const match = files.find((f) => titleOf(f).toLowerCase() === title.toLowerCase() || baseName(f.name) === baseName(name));
+  return match ? match.path : "";
+}
 
 async function addFiles(list) {
   for (const file of Array.from(list)) { // copy first: the browser empties the original list right after
@@ -149,7 +187,8 @@ async function addFiles(list) {
     const text = await file.text();
     const detected = detectType(text);
     const title = pageTitle(text) || file.name;
-    pending.push({ text, detected, type: detected, title, name: cleanName(file.name) });
+    const name = cleanName(file.name);
+    pending.push({ text, detected, type: detected, title, name, target: suggestTarget(title, name) });
   }
   renderPending();
 }
@@ -157,17 +196,23 @@ async function addFiles(list) {
 function renderPending() {
   $("#pending").hidden = !pending.length;
   $("#pending-list").innerHTML = pending.map((p, i) => {
-    const replaces = files.some((f) => f.path === targetPath(p));
+    const target = files.find((f) => f.path === targetPath(p));
+    const options = files.map((f) => `<option value="${esc(f.path)}"${f.path === p.target ? " selected" : ""}>↻ Replace: ${esc(titleOf(f))}</option>`).join("");
     return `
-      <li class="row" data-index="${i}" style="--i: ${i}">
+      <li class="row${target ? " replacing" : ""}" data-index="${i}" style="--i: ${i}">
         <div class="row-main">
           <strong>${esc(p.title)}</strong>
-          <small>Looks like ${p.detected === "email" ? "an <b>email</b>" : "a <b>blog post</b>"} · saved as ${esc(targetPath(p))}${replaces ? " · <b>replaces the current one</b>" : ""}</small>
+          <small>${target
+            ? `<b class="replace-note">↻ Replaces “${esc(titleOf(target))}”</b> · your client's link stays the same`
+            : `Looks like ${p.detected === "email" ? "an <b>email</b>" : "a <b>blog post</b>"} · saved as ${esc(targetPath(p))}`}</small>
         </div>
-        <div class="seg" role="group" aria-label="Type">
+        <select class="pending-target" data-target aria-label="New file or replace an existing one">
+          <option value="">＋ New file</option>${options}
+        </select>
+        ${p.target ? "" : `<div class="seg" role="group" aria-label="Type">
           <button type="button" data-type="email" aria-pressed="${p.type === "email"}">Email</button>
           <button type="button" data-type="blog" aria-pressed="${p.type === "blog"}">Blog</button>
-        </div>
+        </div>`}
         <button type="button" class="icon-button" data-remove aria-label="Remove ${esc(p.title)}">×</button>
       </li>`;
   }).join("");
@@ -183,6 +228,12 @@ $("#pending-list").addEventListener("click", (e) => {
   renderPending();
 });
 
+$("#pending-list").addEventListener("change", (e) => {
+  const row = e.target.closest("[data-index]");
+  if (row && e.target.matches("[data-target]")) pending[row.dataset.index].target = e.target.value;
+  renderPending();
+});
+
 $("#cancel").addEventListener("click", () => { pending = []; renderPending(); });
 
 // One file at a time: GitHub rejects two saves to the same branch at the same moment.
@@ -191,6 +242,7 @@ $("#publish").addEventListener("click", async () => {
   buttons.forEach((b) => { b.disabled = true; });
   $("#publish").textContent = "Publishing…";
   let count = 0;
+  let last = "";
   for (const p of [...pending]) {
     const path = targetPath(p);
     try {
@@ -198,6 +250,7 @@ $("#publish").addEventListener("click", async () => {
       await saveFile(path, p.text, existing?.sha, `${existing ? "Replace" : "Upload"} ${p.type}: ${p.title}`);
       pending.splice(pending.indexOf(p), 1);
       count++;
+      last = path;
       watch(path, p.text);
     } catch (err) {
       toast(err.message, true);
@@ -206,7 +259,7 @@ $("#publish").addEventListener("click", async () => {
   }
   buttons.forEach((b) => { b.disabled = false; });
   renderPending();
-  renderFiles();
+  renderFiles(last);
   if (count) toast(`${count > 1 ? `${count} files` : "File"} saved ✓ Your client will see ${count > 1 ? "them" : "it"} in about 1–2 minutes.`);
 });
 
