@@ -25,7 +25,7 @@ async function api(route, { method = "GET", body } = {}) {
   });
   const data = await res.json().catch(() => ({}));
   if (res.ok) return data;
-  const error = new Error(res.status === 404 && route === "session"
+  const error = new Error(res.status === 404 && route === "status"
     ? "The Studio needs the Render Web Service version of this site (see README)."
     : data.error || `Something went wrong (error ${res.status}).`);
   error.status = res.status;
@@ -47,44 +47,17 @@ async function saveFile(path, text, sha, message) {
 }
 
 // ---------------------------------------------------------------- Screens
-function showLogin(message = "") {
+function showSetup(message = "") {
   $("#studio").hidden = true;
-  $("#login").hidden = false;
-  $("#login-status").textContent = message;
-  $("#password").focus();
-}
-
-function showSetup() {
-  $("#studio").hidden = true;
-  $("#login").hidden = true;
   $("#setup").hidden = false;
+  $("#setup-status").textContent = message;
 }
 
-function showStudio(open = false) {
-  $("#logout-wrap").hidden = open;
-  $("#login").hidden = true;
+function showStudio() {
+  $("#setup").hidden = true;
   $("#studio").hidden = false;
   loadFiles();
 }
-
-$("#login-form").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const status = $("#login-status");
-  status.textContent = "Checking…";
-  try {
-    await api("login", { method: "POST", body: { password: $("#password").value } });
-    $("#password").value = "";
-    status.textContent = "";
-    showStudio();
-  } catch (err) {
-    status.textContent = err.message;
-  }
-});
-
-$("#logout").addEventListener("click", async () => {
-  await api("logout", { method: "POST" }).catch(() => {});
-  showLogin();
-});
 
 // ---------------------------------------------------------------- Your files
 const typeOf = (f) => FOLDERS[f.path.split("/")[0]] || published.get(f.path)?.type || "auto";
@@ -98,7 +71,6 @@ async function loadFiles() {
     files = (await api("files")).sort((a, b) => b.name.localeCompare(a.name));
     renderFiles();
   } catch (err) {
-    if (err.status === 401) return showLogin(err.message);
     $("#files").innerHTML = `<li class="row empty-row">${esc(err.message)}</li>`;
   }
 }
@@ -229,7 +201,6 @@ $("#publish").addEventListener("click", async () => {
       watch(path, p.text);
     } catch (err) {
       toast(err.message, true);
-      if (err.status === 401) showLogin(err.message);
       break;
     }
   }
@@ -299,10 +270,6 @@ function toast(message, isError = false) {
   t.timer = setTimeout(() => { t.hidden = true; }, isError ? 9000 : 6000);
 }
 
-api("session")
-  .then(({ signedIn, configured, open }) => {
-    if (!configured) showSetup();
-    else if (signedIn) showStudio(open);
-    else showLogin();
-  })
-  .catch((err) => showLogin(err.message));
+api("status")
+  .then(({ configured }) => (configured ? showStudio() : showSetup()))
+  .catch((err) => showSetup(err.message));

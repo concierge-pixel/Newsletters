@@ -32,20 +32,7 @@
           key <code>GITHUB_TOKEN</code>, value = the key you copied.</li>
         <li>Click <b>Save, rebuild, and deploy</b>. When it says <b>Live</b>, reload this page.</li>
       </ol>
-    </section>
-
-    <!-- Sign in with the Studio password (only if STUDIO_PASSWORD is set in Render) -->
-    <section id="login" class="panel" hidden>
-      <h2>Studio password</h2>
-      <form id="login-form">
-        <label for="password">Password</label>
-        <div class="inline-form">
-          <input id="password" type="password" autocomplete="current-password" />
-          <button class="button primary" type="submit">Enter</button>
-        </div>
-        <p id="login-status" class="status" role="status"></p>
-      </form>
-      <p class="note">This browser will remember you. The password is the one saved in Render as <code>STUDIO_PASSWORD</code>.</p>
+      <p id="setup-status" class="status" role="status"></p>
     </section>
 
     <!-- Upload and manage -->
@@ -78,7 +65,7 @@
         <ul id="files" class="rows"></ul>
       </div>
 
-      <p class="note">Files are saved in <code>concierge-pixel/Newsletters</code><span id="logout-wrap"> · <button type="button" id="logout" class="link">Sign out of this browser</button></span></p>
+      <p class="note">Files are saved in <code>concierge-pixel/Newsletters</code></p>
     </section>
   </main>
 

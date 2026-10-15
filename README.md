@@ -17,7 +17,6 @@ No database: GitHub stores the files and a tiny server on Render (`server.js`, n
 
 Open `https://your-site.onrender.com/admin.html`, or click **Upload files (Studio)** at the bottom of the client page.
 It is open to anyone with the link (no password). The GitHub token never reaches the browser: it stays on the server.
-If one day you want a password, add `STUDIO_PASSWORD` in Render → Environment and the Studio will ask for it.
 
 **Every day:**
 
@@ -57,7 +56,6 @@ In Render create a **Web Service** (New → Web Service) from this repository wi
 
 - `GITHUB_TOKEN` (required for the Studio): create it at https://github.com/settings/personal-access-tokens/new
   (Repository access: only `concierge-pixel/Newsletters`; Permissions → **Contents: Read and write**).
-- `STUDIO_PASSWORD` (optional): only if you want the Studio to ask for a password.
 
 The free plan sleeps after 15 minutes without visits; the first visit after that takes about 30 seconds.
 

@@ -2,17 +2,14 @@
 // - Serves the site: the client page (index.html) and your Studio (admin.html).
 // - Studio API: list, upload, replace and delete HTML files. The GitHub token stays here on the
 //   server (Render → Environment → GITHUB_TOKEN) and never reaches the browser.
-// - The Studio is open to anyone with the link, unless you set STUDIO_PASSWORD in Render.
+// - The Studio is open to anyone with the link (no password).
 
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
-const crypto = require("crypto");
 
 const PORT = process.env.PORT || 3000;
 const TOKEN = (process.env.GITHUB_TOKEN || "").trim();
-const PASSWORD = process.env.STUDIO_PASSWORD || "";
-const OPEN = !PASSWORD; // no password set = open Studio
 const REPO = process.env.GITHUB_REPO || "concierge-pixel/Newsletters";
 const BRANCH = process.env.GITHUB_BRANCH || "main";
 const GITHUB_API = process.env.GITHUB_API_URL || "https://api.github.com";
@@ -27,19 +24,7 @@ const TYPES = {
   ".svg": "image/svg+xml", ".ico": "image/x-icon", ".md": "text/plain; charset=utf-8",
 };
 
-// ---------------------------------------------------------------- Studio login (signed cookie)
-const secret = crypto.createHash("sha256").update(`${TOKEN}:${PASSWORD}`).digest(); // new password = everyone signs in again
-const SESSION = crypto.createHmac("sha256", secret).update("studio-session").digest("hex");
-const sameText = (a, b) => crypto.timingSafeEqual(
-  crypto.createHash("sha256").update(String(a)).digest(), crypto.createHash("sha256").update(String(b)).digest());
-
-function isSignedIn(req) {
-  if (OPEN) return true;
-  const cookie = (req.headers.cookie || "").match(/(?:^|;\s*)studio=([a-f0-9]{64})/);
-  return Boolean(cookie && sameText(cookie[1], SESSION));
-}
-
-// Simple limits per address: 10 wrong passwords per 15 minutes, 60 saves/deletes per hour.
+// ---------------------------------------------------------------- Limit: 60 saves/deletes per hour per visitor
 const counters = new Map();
 function overLimit(key, max) {
   const c = counters.get(key);
@@ -83,28 +68,8 @@ const validPath = (p) => typeof p === "string" && new RegExp(`^(${FOLDERS.join("
 async function handleApi(req, res, route) {
   const ip = String(req.headers["x-forwarded-for"] || req.socket.remoteAddress || "").split(",")[0].trim();
 
-  if (route === "session" && req.method === "GET") {
-    return send(res, 200, { signedIn: isSignedIn(req), configured: Boolean(TOKEN), open: OPEN });
-  }
-  if (route === "login" && req.method === "POST") {
-    if (OPEN) return send(res, 200, { ok: true });
-    if (overLimit(`login:${ip}`, 10)) return send(res, 429, { error: "Too many tries. Wait 15 minutes and try again." });
-    const { password = "" } = await readJson(req);
-    if (!sameText(password, PASSWORD)) {
-      count(`login:${ip}`, 15 * 60 * 1000);
-      return send(res, 401, { error: "Wrong password." });
-    }
-    const secure = req.headers["x-forwarded-proto"] === "https" ? "; Secure" : "";
-    res.setHeader("Set-Cookie", `studio=${SESSION}; HttpOnly; Path=/; SameSite=Strict; Max-Age=31536000${secure}`);
-    return send(res, 200, { ok: true });
-  }
-  if (route === "logout" && req.method === "POST") {
-    res.setHeader("Set-Cookie", "studio=; HttpOnly; Path=/; SameSite=Strict; Max-Age=0");
-    return send(res, 200, { ok: true });
-  }
-
+  if (route === "status" && req.method === "GET") return send(res, 200, { configured: Boolean(TOKEN) });
   if (route !== "files") return send(res, 404, { error: "Not found." });
-  if (!isSignedIn(req)) return send(res, 401, { error: "Please enter the Studio password again." });
   if (!TOKEN) return send(res, 503, { error: "Render is missing GITHUB_TOKEN (Environment). See the README." });
 
   if (req.method === "GET") {
@@ -188,5 +153,4 @@ http.createServer(async (req, res) => {
 }).listen(PORT, () => {
   console.log(`Site running on port ${PORT}`);
   if (!TOKEN) console.warn("⚠ Studio can't save files: set GITHUB_TOKEN in Render → Environment.");
-  console.log(OPEN ? "Studio: open (no STUDIO_PASSWORD set)" : "Studio: protected with STUDIO_PASSWORD");
 });
