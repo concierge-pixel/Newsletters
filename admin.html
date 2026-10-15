@@ -21,7 +21,20 @@
   </header>
 
   <main class="studio">
-    <!-- Sign in with the Studio password -->
+    <!-- Shown until GITHUB_TOKEN is saved in Render -->
+    <section id="setup" class="panel" hidden>
+      <h2>One last step in Render</h2>
+      <p>The Studio saves your files in GitHub, so Render needs a GitHub key (only once):</p>
+      <ol class="steps">
+        <li>Create it at <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com → new fine-grained token</a>:
+          <b>Only select repositories</b> → <code>concierge-pixel/Newsletters</code>, and <b>Contents: Read and write</b>.</li>
+        <li>In Render, open this Web Service → <b>Environment</b> → <b>Add Environment Variable</b>:
+          key <code>GITHUB_TOKEN</code>, value = the key you copied.</li>
+        <li>Click <b>Save, rebuild, and deploy</b>. When it says <b>Live</b>, reload this page.</li>
+      </ol>
+    </section>
+
+    <!-- Sign in with the Studio password (only if STUDIO_PASSWORD is set in Render) -->
     <section id="login" class="panel" hidden>
       <h2>Studio password</h2>
       <form id="login-form">
@@ -65,7 +78,7 @@
         <ul id="files" class="rows"></ul>
       </div>
 
-      <p class="note">Files are saved in <code>concierge-pixel/Newsletters</code> · <button type="button" id="logout" class="link">Sign out of this browser</button></p>
+      <p class="note">Files are saved in <code>concierge-pixel/Newsletters</code><span id="logout-wrap"> · <button type="button" id="logout" class="link">Sign out of this browser</button></span></p>
     </section>
   </main>
 

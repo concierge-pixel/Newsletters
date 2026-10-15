@@ -1,5 +1,5 @@
 # Render settings (Web Service). If you create the service by hand in the dashboard, use the same values:
-# Build Command = npm install · Start Command = npm start · Environment: GITHUB_TOKEN and STUDIO_PASSWORD
+# Build Command = npm install · Start Command = npm start · Environment: GITHUB_TOKEN (STUDIO_PASSWORD optional)
 services:
   - type: web
     runtime: node
@@ -11,6 +11,4 @@ services:
     healthCheckPath: /healthz
     envVars:
       - key: GITHUB_TOKEN
-        sync: false
-      - key: STUDIO_PASSWORD
         sync: false

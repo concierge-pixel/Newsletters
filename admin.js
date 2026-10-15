@@ -1,6 +1,6 @@
 // Studio — upload, replace and delete emails/blog posts from the browser.
 // The server (server.js) saves each change in the GitHub repository with the token stored in Render,
-// and Render republishes the site (1–2 min). The browser only knows the Studio password.
+// and Render republishes the site (1–2 min). The token never reaches the browser.
 
 const FOLDERS = { emails: "email", blog: "blog", uploads: null }; // the folders build.js reads
 const SAVE_TO = { email: "emails", blog: "blog" };                // where new uploads go
@@ -54,7 +54,14 @@ function showLogin(message = "") {
   $("#password").focus();
 }
 
-function showStudio() {
+function showSetup() {
+  $("#studio").hidden = true;
+  $("#login").hidden = true;
+  $("#setup").hidden = false;
+}
+
+function showStudio(open = false) {
+  $("#logout-wrap").hidden = open;
   $("#login").hidden = true;
   $("#studio").hidden = false;
   loadFiles();
@@ -293,9 +300,9 @@ function toast(message, isError = false) {
 }
 
 api("session")
-  .then(({ signedIn, configured }) => {
-    if (!configured) showLogin("Render is missing GITHUB_TOKEN or STUDIO_PASSWORD (Environment). See the README.");
-    else if (signedIn) showStudio();
+  .then(({ signedIn, configured, open }) => {
+    if (!configured) showSetup();
+    else if (signedIn) showStudio(open);
     else showLogin();
   })
   .catch((err) => showLogin(err.message));

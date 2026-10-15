@@ -15,8 +15,9 @@ No database: GitHub stores the files and a tiny server on Render (`server.js`, n
 
 ## Studio: upload, replace and delete (admin.html)
 
-Open `https://your-site.onrender.com/admin.html` and type your **Studio password** (the one saved in Render as
-`STUDIO_PASSWORD`). The browser remembers you. The GitHub token never reaches the browser: it stays on the server.
+Open `https://your-site.onrender.com/admin.html`, or click **Upload files (Studio)** at the bottom of the client page.
+It is open to anyone with the link (no password). The GitHub token never reaches the browser: it stays on the server.
+If one day you want a password, add `STUDIO_PASSWORD` in Render → Environment and the Studio will ask for it.
 
 **Every day:**
 
@@ -52,11 +53,11 @@ In Render create a **Web Service** (New → Web Service) from this repository wi
 | Instance Type      | **Free**                                |
 | Health Check Path  | `/healthz` (under Advanced, optional)   |
 
-**Environment Variables** (two):
+**Environment Variables:**
 
-- `GITHUB_TOKEN`: create it at https://github.com/settings/personal-access-tokens/new
+- `GITHUB_TOKEN` (required for the Studio): create it at https://github.com/settings/personal-access-tokens/new
   (Repository access: only `concierge-pixel/Newsletters`; Permissions → **Contents: Read and write**).
-- `STUDIO_PASSWORD`: any password you choose for the Studio.
+- `STUDIO_PASSWORD` (optional): only if you want the Studio to ask for a password.
 
 The free plan sleeps after 15 minutes without visits; the first visit after that takes about 30 seconds.
 
@@ -81,8 +82,9 @@ Her browser also remembers what she already reviewed and shows it on the cards.
 
 ## Privacy
 
-Anyone with the link can see the content (the client page has no password). The Studio needs your Studio password,
-and after 10 wrong tries it locks for 15 minutes. The GitHub token stays on the server, never in the browser or the code.
+Anyone with the link can see the content and use the Studio (no passwords). The Studio can only add, replace or delete
+`.html` files in `emails/`, `blog/` and `uploads/` (at most 60 changes per hour per visitor), and every change is saved
+in GitHub's history, so anything can be restored. The GitHub token stays on the server, never in the browser or the code.
 The page asks Google and other search engines not to index it (`robots.txt` and `noindex`).
 If the GitHub repository is public, the files can also be seen on GitHub.
 

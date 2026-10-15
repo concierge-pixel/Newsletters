@@ -149,6 +149,11 @@ main { max-width: 1160px; margin: 0 auto; padding: 20px 24px 72px; }
 .done h3 { margin: 18px 0 8px; }
 .done p { color: var(--muted); margin: 0 0 24px; }
 
+/* Footer link to the Studio (index.html) */
+.footer { max-width: 1160px; margin: 0 auto; padding: 0 24px 40px; text-align: center; }
+.footer a { color: var(--muted); font-size: 14px; text-decoration: none; border-bottom: 1px dashed var(--accent-mid); transition: color .2s; }
+.footer a:hover { color: var(--accent); }
+
 /* Studio (admin.html) */
 .studio-page .header { max-width: 920px; }
 .header-link { display: inline-block; margin-top: 22px; }
@@ -160,6 +165,9 @@ main { max-width: 1160px; margin: 0 auto; padding: 20px 24px 72px; }
 .panel-head h2 { margin: 0; }
 .panel-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
 .muted { color: var(--muted); font-weight: 400; font-family: var(--sans); font-size: 14px; }
+.steps { margin: 0; padding-left: 22px; }
+.steps li { margin-bottom: 10px; }
+.steps a { color: var(--accent); font-weight: 600; }
 code { font-size: 13px; background: var(--accent-soft); color: var(--accent); padding: 2px 6px; border-radius: 6px; }
 .inline-form { display: flex; gap: 10px; flex-wrap: wrap; }
 .inline-form input { flex: 1; min-width: 200px; font: 15px var(--sans); padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; }
